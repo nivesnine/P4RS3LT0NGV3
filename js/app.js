@@ -26,7 +26,11 @@ new Vue({
         selectedCarrier: null,
         activeSteg: null,
         carriers: window.steganography.carriers,
-        showDecoder: true
+        showDecoder: true,
+        // Emoji Library
+        emojiSearch: '',
+        filteredEmojis: [...window.emojiLibrary.EMOJI_LIST],
+        selectedEmoji: null
     },
     methods: {
         // Theme Toggle
@@ -52,13 +56,29 @@ new Vue({
 
         // Steganography Methods
         selectCarrier(carrier) {
-            this.selectedCarrier = carrier;
-            this.activeSteg = 'emoji';
-            this.autoEncode();
+            // Toggle carrier selection if clicking the same one again
+            if (this.selectedCarrier === carrier) {
+                this.selectedCarrier = null;
+                this.encodedMessage = '';
+            } else {
+                this.selectedCarrier = carrier;
+                this.activeSteg = 'emoji';
+                this.autoEncode();
+            }
         },
         setStegMode(mode) {
-            this.activeSteg = mode;
-            this.autoEncode();
+            // Toggle mode selection if clicking the same one again
+            if (this.activeSteg === mode) {
+                this.activeSteg = null;
+                this.encodedMessage = '';
+            } else {
+                this.activeSteg = mode;
+                // When switching to invisible mode, clear the carrier selection
+                if (mode === 'invisible') {
+                    this.selectedCarrier = null;
+                }
+                this.autoEncode();
+            }
         },
         autoEncode() {
             if (!this.emojiMessage) {
@@ -249,13 +269,67 @@ new Vue({
             }
             
             return null;
+        },
+        
+        // Emoji Library Methods
+        filterEmojis() {
+            if (!this.emojiSearch) {
+                this.filteredEmojis = [...window.emojiLibrary.EMOJI_LIST];
+                this.renderEmojiGrid();
+                return;
+            }
+            
+            const searchTerm = this.emojiSearch.toLowerCase();
+            this.filteredEmojis = window.emojiLibrary.EMOJI_LIST.filter(emoji => {
+                // Simple search - we could enhance this with emoji names/descriptions later
+                return emoji.toLowerCase().includes(searchTerm);
+            });
+            
+            this.renderEmojiGrid();
+        },
+        
+        selectEmoji(emoji) {
+            this.selectedEmoji = emoji;
+            
+            // Insert the emoji at cursor position in the textarea
+            const textarea = document.getElementById('steg-input');
+            if (textarea) {
+                const startPos = textarea.selectionStart;
+                const endPos = textarea.selectionEnd;
+                const currentValue = this.emojiMessage;
+                
+                // Insert emoji at cursor position
+                this.emojiMessage = currentValue.substring(0, startPos) + emoji + currentValue.substring(endPos);
+                
+                // Set cursor position after the inserted emoji
+                this.$nextTick(() => {
+                    textarea.focus();
+                    textarea.selectionStart = startPos + emoji.length;
+                    textarea.selectionEnd = startPos + emoji.length;
+                    
+                    // Trigger encoding
+                    this.autoEncode();
+                });
+                
+                this.showNotification(`Emoji ${emoji} inserted`);
+            }
+        },
+        
+        renderEmojiGrid() {
+            window.emojiLibrary.renderEmojiGrid('emoji-grid-container', this.selectEmoji.bind(this), this.filteredEmojis);
         }
     },
-    // Initialize theme
+    // Initialize theme and components
     mounted() {
+        // Apply theme
         if (this.isDarkTheme) {
             document.body.classList.add('dark-theme');
         }
+        
+        // Initialize emoji grid
+        this.$nextTick(() => {
+            this.renderEmojiGrid();
+        });
     },
     // Keyboard shortcuts
     created() {

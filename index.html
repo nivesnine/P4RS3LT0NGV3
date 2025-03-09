@@ -79,31 +79,75 @@
                                 @click="selectCarrier(carrier)"
                                 :title="carrier.desc"
                             >
-                                {{ carrier.emoji }} {{ carrier.name }}
+                                <div class="carrier-content">
+                                    <span class="carrier-emoji">{{ carrier.emoji }}</span>
+                                    <span class="carrier-name">{{ carrier.name }}</span>
+                                </div>
                                 <small class="transform-preview" v-if="emojiMessage">
+                                    <span class="preview-label">Preview:</span>
                                     <span class="encoded-preview">{{ carrier.preview ? carrier.preview(emojiMessage.slice(0, 10)) : '' }}</span>
+                                    <span class="preview-ellipsis" v-if="emojiMessage.length > 10">...</span>
                                 </small>
                             </button>
-                            <button 
-                                class="transform-button"
-                                :class="{ active: activeSteg === 'invisible' }"
-                                @click="setStegMode('invisible')"
-                                title="Make text invisible using zero-width characters"
-                            >
-                                <i class="fas fa-eye-slash"></i> Invisible
-                                <small class="transform-preview" v-if="emojiMessage">
-                                    {{ previewInvisible(emojiMessage.slice(0, 10)) }}
-                                </small>
-                            </button>
+                        </div>
+                        
+                        <!-- Big Invisible Text Button -->
+                        <button 
+                            class="transform-button invisible-button"
+                            :class="{ active: activeSteg === 'invisible' }"
+                            @click="setStegMode('invisible')"
+                            title="Make text invisible using zero-width characters"
+                        >
+                            <div class="carrier-content">
+                                <span class="carrier-emoji"><i class="fas fa-eye-slash"></i></span>
+                                <span class="carrier-name">Invisible Text Mode</span>
+                            </div>
+                            <small class="transform-preview" v-if="emojiMessage">
+                                <span class="preview-label">Preview:</span>
+                                <span class="encoded-preview">{{ previewInvisible(emojiMessage.slice(0, 10)) }}</span>
+                                <span class="preview-ellipsis" v-if="emojiMessage.length > 10">...</span>
+                            </small>
+                        </button>
+                    </div>
+
+                    <!-- Emoji Library Section -->
+                    <div class="emoji-library">
+                        <div class="emoji-library-header">
+                            <div class="emoji-library-title">
+                                <i class="fas fa-icons"></i> Quick Emoji Picker
+                                <span class="emoji-library-subtitle">Click any emoji to insert it at cursor position</span>
+                            </div>
+                            <div class="emoji-search">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Search emojis..." v-model="emojiSearch" @input="filterEmojis">
+                            </div>
+                        </div>
+                        <div id="emoji-grid-container" class="emoji-grid-wrapper"></div>
+                        <div class="emoji-library-footer" v-if="selectedEmoji">
+                            <div class="selected-emoji-info">
+                                <span class="selected-emoji">{{ selectedEmoji }}</span>
+                                <span class="selected-emoji-label">Last selected</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="output-section" v-if="encodedMessage">
+                        <div class="output-heading">
+                            <h4>
+                                <i class="fas fa-check-circle"></i> 
+                                Encoded Message
+                                <small v-if="selectedCarrier">using {{ selectedCarrier.name }}</small>
+                                <small v-else-if="activeSteg === 'invisible'">using Invisible Text</small>
+                            </h4>
+                        </div>
                         <div class="output-container">
                             <textarea readonly v-model="encodedMessage"></textarea>
                             <button class="copy-button" @click="copyToClipboard(encodedMessage)" title="Copy to clipboard">
                                 <i class="fas fa-copy"></i>
                             </button>
+                        </div>
+                        <div class="output-instructions">
+                            <small><i class="fas fa-info-circle"></i> Copy this text and share it. Only people who know how to decode it will be able to read your message.</small>
                         </div>
                     </div>
 
@@ -179,6 +223,7 @@
 
     <script src="js/transforms.js"></script>
     <script src="js/steganography.js"></script>
+    <script src="js/emojiLibrary.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
