@@ -19,10 +19,17 @@ function encodeEmoji(emoji, text) {
     const vs15 = '\ufe0e';  // text variation selector (0)
     const vs16 = '\ufe0f';  // emoji variation selector (1)
     
+    // Start with the emoji character
     let result = emoji;
+    
+    // Add variation selectors based on binary representation
     for (const bit of binary) {
         result += bit === '0' ? vs15 : vs16;
     }
+    
+    // Ensure there's a zero-width space after the encoded content
+    // This helps with browser rendering
+    result += '\u200B';
     
     return result;
 }
@@ -30,7 +37,12 @@ function encodeEmoji(emoji, text) {
 function decodeEmoji(text) {
     if (!text) return '';
     
-    // Extract variation selectors
+    // Find the first emoji character (looking for common emoji Unicode ranges)
+    const emojiMatch = text.match(/^([\u{1F300}-\u{1F6FF}\u{2600}-\u{26FF}])/u);
+    if (!emojiMatch) return '';
+    
+    // Extract variation selectors - remove any zero-width spaces first
+    text = text.replace(/\u200B/g, '');
     const matches = [...text.matchAll(/[\ufe0e\ufe0f]/g)];
     if (!matches.length) return '';
     
