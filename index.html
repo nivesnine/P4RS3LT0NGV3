@@ -13,128 +13,175 @@
 <body>
     <div id="app" class="container">
         <header>
-            <h1>🐍 Parseltongue 2.0</h1>
-            <h3>LLM Payload Crafter</h3>
+            <div class="logo">
+                <h1>🐍 Parseltongue</h1>
+            </div>
+            <div class="actions">
+                <button 
+                    @click="toggleTheme" 
+                    @keyup.d="toggleTheme"
+                    class="theme-button" 
+                    title="Toggle dark mode (D)"
+                    aria-label="Toggle dark mode"
+                >
+                    <i class="fas" :class="isDarkTheme ? 'fa-moon' : 'fa-sun'"></i>
+                </button>
+                <a 
+                    href="https://github.com/elder-plinius/P4RS3LT0NGV3" 
+                    target="_blank" 
+                    class="github-button" 
+                    title="View source on GitHub"
+                    aria-label="View source code on GitHub"
+                >
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
         </header>
 
         <div class="tabs">
             <div class="tab-buttons">
-                <button :class="{ active: activeTab === 'steganography' }" @click="activeTab = 'steganography'">Steganography</button>
-                <button :class="{ active: activeTab === 'transforms' }" @click="activeTab = 'transforms'">Text Transforms</button>
-                <button :class="{ active: activeTab === 'about' }" @click="activeTab = 'about'">About</button>
+                <button 
+                    :class="{ active: activeTab === 'transforms' }" 
+                    @click="activeTab = 'transforms'"
+                    @keyup.t="activeTab = 'transforms'"
+                    title="Transform text (T)"
+                >
+                    <i class="fas fa-font"></i> Transform
+                </button>
+                <button 
+                    :class="{ active: activeTab === 'steganography' }" 
+                    @click="activeTab = 'steganography'"
+                    @keyup.h="activeTab = 'steganography'"
+                    title="Hide text (H)"
+                >
+                    <i class="fas fa-eye-slash"></i> Hide
+                </button>
             </div>
 
             <!-- Steganography Tab -->
             <div v-if="activeTab === 'steganography'" class="tab-content">
-                <h4>✨ Emoji Steganography</h4>
-                <div class="form-group">
-                    <label for="emoji-message">Enter your message:</label>
-                    <textarea id="emoji-message" v-model="emojiMessage" placeholder="Type your message here..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Select an emoji carrier:</label>
-                    <div class="emoji-grid">
-                        <button 
-                            v-for="carrier in carriers" 
-                            :key="carrier.name"
-                            class="emoji-button"
-                            @click="selectCarrier(carrier)"
-                            :class="{ selected: selectedCarrier === carrier }"
-                        >
-                            {{ carrier.emoji }}
-                            <span class="tooltip">{{ carrier.desc }}</span>
-                        </button>
+                <div class="transform-layout">
+                    <div class="input-section">
+                        <textarea 
+                            id="steg-input" 
+                            v-model="emojiMessage" 
+                            placeholder="Enter text to hide..."
+                            @input="autoEncode"
+                        ></textarea>
                     </div>
-                </div>
 
-                <div class="form-group" v-if="selectedCarrier && emojiMessage">
-                    <label>Encoded Message:</label>
-                    <textarea readonly v-model="encodedEmojiMessage"></textarea>
-                    <button class="copy-button" @click="copyToClipboard(encodedEmojiMessage)">
-                        <i class="fas fa-clipboard"></i> Copy
-                    </button>
-                </div>
+                    <div class="transform-section">
+                        <div class="transform-buttons">
+                            <button 
+                                v-for="carrier in carriers" 
+                                :key="carrier.name"
+                                class="transform-button"
+                                :class="{ active: selectedCarrier === carrier }"
+                                @click="selectCarrier(carrier)"
+                                :title="carrier.desc"
+                            >
+                                {{ carrier.emoji }} {{ carrier.name }}
+                                <small class="transform-preview" v-if="emojiMessage">
+                                    {{ carrier.preview ? carrier.preview(emojiMessage.slice(0, 10)) : '' }}
+                                </small>
+                            </button>
+                            <button 
+                                class="transform-button"
+                                :class="{ active: activeSteg === 'invisible' }"
+                                @click="setStegMode('invisible')"
+                                title="Make text invisible using zero-width characters"
+                            >
+                                <i class="fas fa-eye-slash"></i> Invisible
+                                <small class="transform-preview" v-if="emojiMessage">
+                                    {{ previewInvisible(emojiMessage.slice(0, 10)) }}
+                                </small>
+                            </button>
+                        </div>
+                    </div>
 
-                <div class="section-divider"></div>
+                    <div class="output-section" v-if="encodedMessage">
+                        <div class="output-container">
+                            <textarea readonly v-model="encodedMessage"></textarea>
+                            <button class="copy-button" @click="copyToClipboard(encodedMessage)" title="Copy to clipboard">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
 
-                <h4>🔍 Invisible Text</h4>
-                <div class="form-group">
-                    <label for="invisible-input">Enter text to make invisible:</label>
-                    <textarea id="invisible-input" v-model="invisibleInput" placeholder="Type your message here..."></textarea>
-                </div>
-
-                <div class="form-group" v-if="invisibleInput">
-                    <label>Invisible Text:</label>
-                    <textarea readonly v-model="invisibleOutput"></textarea>
-                    <button class="copy-button" @click="copyToClipboard(invisibleOutput)">
-                        <i class="fas fa-clipboard"></i> Copy
-                    </button>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <h4>🔎 Universal Decoder</h4>
-                <div class="form-group">
-                    <label for="decode-input">Enter text to decode:</label>
-                    <textarea id="decode-input" v-model="decodeInput" placeholder="Paste encoded text here..."></textarea>
-                </div>
-
-                <div class="form-group" v-if="decodedMessage">
-                    <label>Decoded Message:</label>
-                    <textarea readonly v-model="decodedMessage"></textarea>
-                    <button class="copy-button" @click="copyToClipboard(decodedMessage)">
-                        <i class="fas fa-clipboard"></i> Copy
-                    </button>
+                    <div class="decode-section" v-if="showDecoder">
+                        <div class="input-container">
+                            <textarea 
+                                id="decode-input" 
+                                v-model="decodeInput" 
+                                placeholder="Paste encoded text to decode..."
+                                @input="autoDecode"
+                            ></textarea>
+                            <div class="decoded-message" v-if="decodedMessage">
+                                {{ decodedMessage }}
+                                <button class="copy-button" @click="copyToClipboard(decodedMessage)" title="Copy decoded text">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Text Transforms Tab -->
             <div v-if="activeTab === 'transforms'" class="tab-content">
-                <h4>Text Transformation Tools</h4>
-                <div class="form-group">
-                    <label for="transform-input">Enter text to transform:</label>
-                    <textarea id="transform-input" v-model="transformInput" placeholder="Type your text here..."></textarea>
-                </div>
+                <div class="transform-layout">
+                    <div class="input-section">
+                        <textarea 
+                            id="transform-input" 
+                            v-model="transformInput" 
+                            placeholder="Enter text to transform..."
+                            @input="autoTransform"
+                        ></textarea>
+                    </div>
 
-                <div class="transform-buttons">
-                    <button v-for="transform in transforms" :key="transform.name" @click="applyTransform(transform.func)" class="transform-button">
-                        {{ transform.name }}
-                    </button>
-                </div>
+                    <div class="transform-section">
+                        <div class="transform-buttons">
+                            <button 
+                                v-for="(transform, index) in transforms" 
+                                :key="transform.name" 
+                                @click="applyTransform(transform.func)"
+                                @keyup="index < 9 ? applyTransform(transform.func) : null"
+                                class="transform-button"
+                                :class="{ active: activeTransform === transform.name }"
+                                :title="transform.name + (index < 9 ? ' (' + (index + 1) + ')' : '')"
+                                :data-shortcut="index < 9 ? index + 1 : ''"
+                            >
+                                {{ transform.name }}
+                                <small class="transform-preview" v-if="transformInput">
+                                    {{ transform.preview ? transform.preview(transformInput.slice(0, 10)) : '' }}
+                                </small>
+                                <kbd v-if="index < 9">{{ index + 1 }}</kbd>
+                            </button>
+                        </div>
+                    </div>
 
-                <div class="form-group" v-if="transformOutput">
-                    <label>Transformed Text:</label>
-                    <textarea readonly v-model="transformOutput"></textarea>
-                    <button class="copy-button" @click="copyToClipboard(transformOutput)">
-                        <i class="fas fa-clipboard"></i> Copy
-                    </button>
+                    <div class="output-section" v-if="transformOutput">
+                        <div class="output-container">
+                            <textarea 
+                                readonly 
+                                v-model="transformOutput"
+                                aria-label="Transformed text output"
+                            ></textarea>
+                            <button 
+                                class="copy-button" 
+                                @click="copyToClipboard(transformOutput)" 
+                                @keyup.c="copyToClipboard(transformOutput)"
+                                title="Copy to clipboard (C)"
+                                aria-label="Copy transformed text to clipboard"
+                            >
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- About Tab -->
-            <div v-if="activeTab === 'about'" class="tab-content">
-                <h4>About Parseltongue 2.0</h4>
-                <p>
-                    Parseltongue 2.0 is a tool for crafting and obfuscating text using various transformation and steganography techniques.
-                    It's designed for educational purposes and to demonstrate the creative ways text can be manipulated.
-                </p>
-                <h5>Features:</h5>
-                <ul>
-                    <li>Emoji Steganography - Hide messages within emoji using Unicode variation selectors</li>
-                    <li>Invisible Text - Create text that's invisible but still present in the document</li>
-                    <li>Text Transformations - Convert text to various formats like leetspeak, binary, morse code, etc.</li>
-                    <li>Universal Decoder - Automatically detect and decode hidden messages</li>
-                </ul>
-                <p>
-                    <strong>Note:</strong> This tool is for educational purposes only. Please use responsibly.
-                </p>
-                <p>
-                    <a href="https://github.com/yourusername/parseltongue" target="_blank" class="github-link">
-                        <i class="fab fa-github"></i> View on GitHub
-                    </a>
-                </p>
-            </div>
+
         </div>
     </div>
 

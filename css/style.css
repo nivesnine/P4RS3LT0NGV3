@@ -1,14 +1,18 @@
-/* Dark hacker theme styling */
+/* Modern dark theme styling */
 :root {
-    --main-bg-color: #0E1117;
-    --text-color: #00FF41;
-    --button-bg: #1E1E1E;
-    --button-border: #00FF41;
-    --button-hover-bg: #00FF41;
-    --button-hover-text: #1E1E1E;
-    --input-bg: #1E1E1E;
-    --input-border: #00FF41;
-    --section-divider: #00FF41;
+    --main-bg-color: #1a1a1a;
+    --secondary-bg: #242424;
+    --text-color: #e0e0e0;
+    --accent-color: #64b5f6;
+    --accent-hover: #90caf9;
+    --success-color: #81c784;
+    --button-bg: #2d2d2d;
+    --button-hover-bg: #404040;
+    --button-active-bg: #64b5f6;
+    --input-bg: #2d2d2d;
+    --input-border: #404040;
+    --section-divider: #404040;
+    --focus-shadow: 0 0 0 2px rgba(100, 181, 246, 0.4);
 }
 
 * {
@@ -20,20 +24,56 @@
 body {
     background-color: var(--main-bg-color);
     color: var(--text-color);
-    font-family: 'Courier New', monospace;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
     padding: 20px;
+    min-height: 100vh;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 24px;
+    background-color: var(--secondary-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 header {
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 30px;
+    padding: 10px;
+}
+
+.logo {
+    text-align: left;
+}
+
+.theme-toggle {
+    margin-left: 20px;
+}
+
+.theme-button {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.theme-button:hover {
+    background: var(--button-bg);
+    transform: rotate(15deg);
 }
 
 h1, h2, h3, h4, h5 {
@@ -44,48 +84,84 @@ h1, h2, h3, h4, h5 {
 
 /* Tabs styling */
 .tabs {
-    margin-top: 20px;
+    margin-top: 16px;
 }
 
 .tab-buttons {
     display: flex;
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--text-color);
+    gap: 8px;
+    margin-bottom: 24px;
 }
 
 .tab-buttons button {
-    background-color: transparent;
+    background-color: var(--button-bg);
     color: var(--text-color);
-    border: none;
-    padding: 10px 20px;
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    padding: 8px 16px;
     cursor: pointer;
-    font-size: 16px;
-    font-family: 'Courier New', monospace;
-    transition: all 0.3s;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.tab-buttons button i {
+    font-size: 14px;
 }
 
 .tab-buttons button.active {
-    border-bottom: 3px solid var(--text-color);
-    font-weight: bold;
+    background-color: var(--accent-color);
+    color: var(--main-bg-color);
+    border-color: var(--accent-color);
+    font-weight: 500;
 }
 
-.tab-buttons button:hover {
-    background-color: rgba(0, 255, 65, 0.1);
+.tab-buttons button:hover:not(.active) {
+    background-color: var(--button-hover-bg);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.transform-button.active {
+    background-color: var(--accent-color);
+    color: var(--main-bg-color);
+    border-color: var(--accent-color);
+}
+
+.transform-button:hover:not(.active) {
+    background-color: var(--button-hover-bg);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
 }
 
 .tab-content {
     padding: 20px 0;
 }
 
-/* Form elements */
-.form-group {
-    margin-bottom: 20px;
+/* Input and output sections */
+.input-section,
+.output-section,
+.decode-section {
+    background: var(--main-bg-color);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 16px;
 }
 
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
+.input-container,
+.output-container {
+    position: relative;
+}
+
+.decoded-message {
+    margin-top: 8px;
+    padding: 8px;
+    background: var(--button-bg);
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    position: relative;
 }
 
 textarea {
@@ -95,9 +171,32 @@ textarea {
     color: var(--text-color);
     border: 1px solid var(--input-border);
     border-radius: 4px;
-    font-family: 'Courier New', monospace;
+    font-family: 'Fira Code', 'Courier New', monospace;
     resize: vertical;
     min-height: 100px;
+    line-height: 1.4;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+textarea::placeholder {
+    color: rgba(224, 224, 224, 0.5);
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: var(--focus-shadow);
+}
+
+button:focus-visible {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: var(--focus-shadow);
+}
+
+button:active {
+    transform: translateY(1px);
 }
 
 button {
@@ -111,75 +210,198 @@ button {
     transition: all 0.3s;
 }
 
+.copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--button-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.copy-button:hover {
+    background: var(--button-hover-bg);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.copy-button:active {
+    transform: translateY(1px);
+}
+
 button:hover {
     background-color: var(--button-hover-bg);
     color: var(--button-hover-text);
 }
 
 /* Emoji grid */
-.emoji-grid {
+
+
+/* Transform layout */
+.transform-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: 10px;
-    margin-top: 10px;
+    gap: 24px;
+    margin-top: 16px;
 }
 
-.emoji-button {
-    padding: 5px;
-    min-width: 60px;
-    height: 60px;
-    font-size: 1.5rem;
-    position: relative;
+.transform-section {
+    background: var(--main-bg-color);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid var(--input-border);
 }
 
-.emoji-button.selected {
-    background-color: rgba(0, 255, 65, 0.2);
-    border: 2px solid var(--text-color);
+.transform-section:focus-within {
+    border-color: var(--accent-color);
+    box-shadow: var(--focus-shadow);
 }
 
-.emoji-button .tooltip {
-    visibility: hidden;
-    background-color: var(--button-bg);
-    color: var(--text-color);
-    text-align: center;
-    border-radius: 4px;
-    padding: 5px;
-    position: absolute;
-    z-index: 1;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    font-size: 0.8rem;
-    opacity: 0;
-    transition: opacity 0.3s;
+.input-section,
+.transform-section,
+.output-section {
+    background: var(--main-bg-color);
+    border-radius: 6px;
+    padding: 16px;
 }
 
-.emoji-button:hover .tooltip {
-    visibility: visible;
-    opacity: 1;
-}
-
-/* Transform buttons */
-.transform-buttons {
+.transform-section h4 {
+    margin-bottom: 16px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-color);
+}
+
+.transform-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.transform-button kbd {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-size: 10px;
+    font-family: 'Fira Code', monospace;
+    pointer-events: none;
+}
+
+.transform-preview {
+    font-size: 11px;
+    opacity: 0.7;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .transform-button {
-    padding: 5px 10px;
-    margin: 2px;
-    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px;
+    text-align: left;
+    border-radius: 4px;
+    background: var(--button-bg);
+    border: 1px solid var(--input-border);
+    transition: all 0.2s ease;
 }
 
-/* Copy button */
-.copy-button {
-    margin-top: 10px;
-    display: inline-flex;
+.transform-name {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.transform-preview {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    font-family: 'Fira Code', monospace;
+    color: var(--accent-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.transform-button {
+    padding: 12px;
+    height: auto;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
+    min-width: 120px;
+    font-weight: 500;
+    text-align: center;
+    border: 1px solid var(--input-border);
+    background: var(--button-bg);
+    color: var(--text-color);
+    transition: all 0.2s ease;
+}
+
+.transform-button:hover {
+    background: var(--button-hover-bg);
+    color: var(--main-bg-color);
+    transform: translateY(-1px);
+}
+
+.transform-button.active {
+    background: var(--button-active-bg);
+    color: var(--main-bg-color);
+    border-color: var(--button-active-bg);
+}
+
+/* Output section */
+.output-container {
+    position: relative;
+}
+
+.copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 8px;
+    background: var(--button-bg);
+    border: none;
+    border-radius: 6px;
+    color: var(--text-color);
+    opacity: 0.7;
+    transition: all 0.2s ease;
+}
+
+.copy-button:hover {
+    opacity: 1;
+    background: var(--button-hover-bg);
+    color: var(--main-bg-color);
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.form-group label i {
+    font-size: 1.1rem;
 }
 
 /* Section dividers */
@@ -189,16 +411,33 @@ button:hover {
 }
 
 /* GitHub link */
-.github-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.theme-button,
+.github-button {
+    background: var(--button-bg);
     color: var(--text-color);
-    text-decoration: none;
-    padding: 8px 16px;
-    border: 1px solid var(--button-border);
+    border: 1px solid var(--input-border);
     border-radius: 4px;
-    transition: all 0.3s;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    width: 32px;
+    height: 32px;
+}
+
+.theme-button:hover,
+.github-button:hover {
+    background: var(--button-hover-bg);
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
 }
 
 .github-link:hover {
