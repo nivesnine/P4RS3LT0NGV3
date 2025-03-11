@@ -12,6 +12,15 @@ window.app = new Vue({
         transformInput: '',
         transformOutput: '',
         activeTransform: null,
+        // Transform categories for styling
+        transformCategories: {
+            encoding: ['Base64', 'Base32', 'Binary', 'Hexadecimal', 'ASCII85', 'URL Encode', 'HTML Entities'],
+            cipher: ['Caesar Cipher', 'ROT13', 'ROT47', 'Morse Code'],
+            visual: ['Rainbow Text', 'Strikethrough', 'Underline', 'Reverse Text'],
+            format: ['Pig Latin', 'Leetspeak', 'NATO Phonetic'],
+            unicode: ['Invisible Text', 'Upside Down', 'Full Width', 'Small Caps', 'Bubble', 'Braille'],
+            special: ['Medieval', 'Cursive', 'Monospace', 'Double-Struck', 'Elder Futhark', 'Mirror Text', 'Zalgo']
+        },
         transforms: Object.entries(window.transforms).map(([key, transform]) => ({
             name: transform.name,
             func: transform.func.bind(transform),
@@ -42,6 +51,13 @@ window.app = new Vue({
         showCopyHistory: false
     },
     methods: {
+        // Get transforms grouped by category
+        getTransformsByCategory(category) {
+            return this.transforms.filter(transform => 
+                this.transformCategories[category].includes(transform.name)
+            );
+        },
+        
         // Theme Toggle
         toggleTheme() {
             this.isDarkTheme = !this.isDarkTheme;
@@ -90,6 +106,39 @@ window.app = new Vue({
                 
                 // Add to copy history
                 this.addToCopyHistory(`Transform: ${this.activeTransform.name}`, this.transformOutput);
+            }
+        },
+        
+        // Check if a transform has a reverse function
+        transformHasReverse(transform) {
+            return transform && typeof transform.reverse === 'function';
+        },
+        
+        // Decode text using the specific transform's reverse function
+        decodeWithTransform(transform) {
+            if (!this.transformInput || !transform || !this.transformHasReverse(transform)) {
+                return;
+            }
+            
+            try {
+                // Use the transform's reverse function to decode the input
+                const decodedText = transform.reverse(this.transformInput);
+                
+                if (decodedText !== this.transformInput) {
+                    // Update the input with the decoded text
+                    this.transformInput = decodedText;
+                    
+                    // Show a notification
+                    this.showNotification(`<i class="fas fa-check"></i> Decoded using ${transform.name}`, 'success');
+                    
+                    // Add to copy history
+                    this.addToCopyHistory(`Decoded (${transform.name})`, decodedText);
+                } else {
+                    this.showNotification(`<i class="fas fa-exclamation-triangle"></i> Could not decode with ${transform.name}`, 'warning');
+                }
+            } catch (error) {
+                console.error(`Error decoding with ${transform.name}:`, error);
+                this.showNotification(`<i class="fas fa-exclamation-triangle"></i> Error decoding with ${transform.name}`, 'error');
             }
         },
 
@@ -449,10 +498,12 @@ window.app = new Vue({
                 }
             }
             
-            // - Invisible text
-            let decoded = window.steganography.decodeInvisible(input);
-            if (decoded) {
-                return { text: decoded, method: 'Invisible Text' };
+            // - Invisible text (only check if the input actually contains invisible characters)
+            if (/[\uE0000-\uE007F]/.test(input)) {
+                let decoded = window.steganography.decodeInvisible(input);
+                if (decoded && decoded.length > 0) {
+                    return { text: decoded, method: 'Invisible Text' };
+                }
             }
             
             // 2. Try transform reversals
@@ -503,21 +554,26 @@ window.app = new Vue({
             const braillePattern = /[⠀-⣿]/;
             if (braillePattern.test(input)) {
                 try {
-                    // Create a reverse mapping for braille
-                    const brailleReverseMap = {};
-                    if (window.transforms.braille && window.transforms.braille.map) {
-                        for (const [key, value] of Object.entries(window.transforms.braille.map)) {
-                            brailleReverseMap[value] = key;
-                        }
-                        
-                        // Decode the braille
-                        let result = '';
-                        for (const char of input) {
-                            result += brailleReverseMap[char] || char;
-                        }
-                        
-                        if (result !== input && /[a-zA-Z0-9]/.test(result)) {
-                            return { text: result, method: 'Braille' };
+                    // Count how many braille characters are in the input
+                    const brailleMatches = [...input.matchAll(/[⠀-⣿]/g)];
+                    // Only proceed if there are enough braille characters (to avoid false positives)
+                    if (brailleMatches.length > 2) {
+                        // Create a reverse mapping for braille
+                        const brailleReverseMap = {};
+                        if (window.transforms.braille && window.transforms.braille.map) {
+                            for (const [key, value] of Object.entries(window.transforms.braille.map)) {
+                                brailleReverseMap[value] = key;
+                            }
+                            
+                            // Decode the braille
+                            let result = '';
+                            for (const char of input) {
+                                result += brailleReverseMap[char] || char;
+                            }
+                            
+                            if (result !== input && /[a-zA-Z0-9]/.test(result)) {
+                                return { text: result, method: 'Braille' };
+                            }
                         }
                     }
                 } catch (e) {
@@ -611,6 +667,168 @@ window.app = new Vue({
                 }
             }
             
+            // Check for specific new transforms before trying the generic approach
+            
+            // - Hexadecimal
+            if (/^[0-9A-Fa-f\s]+$/.test(input.trim())) {
+                try {
+                    if (window.transforms.hex && window.transforms.hex.reverse) {
+                        const result = window.transforms.hex.reverse(input);
+                        if (result && /[\x20-\x7E]{3,}/.test(result)) {
+                            return { text: result, method: 'Hexadecimal' };
+                        }
+                    }
+                } catch (e) {
+                    console.error('Hex decode error:', e);
+                }
+            }
+            
+            // - URL Encoded
+            if (/%[0-9A-Fa-f]{2}/.test(input)) {
+                try {
+                    if (window.transforms.url && window.transforms.url.reverse) {
+                        const result = window.transforms.url.reverse(input);
+                        if (result !== input && /[\x20-\x7E]{3,}/.test(result)) {
+                            return { text: result, method: 'URL Encoded' };
+                        }
+                    } else {
+                        // Fallback implementation
+                        try {
+                            const result = decodeURIComponent(input);
+                            if (result !== input && /[\x20-\x7E]{3,}/.test(result)) {
+                                return { text: result, method: 'URL Encoded' };
+                            }
+                        } catch (e) {
+                            console.error('URL decode fallback error:', e);
+                        }
+                    }
+                } catch (e) {
+                    console.error('URL decode error:', e);
+                }
+            }
+            
+            // - HTML Entities
+            if (/&[#a-zA-Z0-9]+;/.test(input)) {
+                try {
+                    if (window.transforms.html && window.transforms.html.reverse) {
+                        const result = window.transforms.html.reverse(input);
+                        if (result !== input && /[\x20-\x7E]{3,}/.test(result)) {
+                            return { text: result, method: 'HTML Entities' };
+                        }
+                    }
+                } catch (e) {
+                    console.error('HTML entities decode error:', e);
+                }
+            }
+            
+            // - ROT13/Caesar Cipher (check if decoding produces more common English words)
+            if (/^[a-zA-Z\s.,!?]+$/.test(input)) {
+                try {
+                    // Try ROT13 first as it's more common
+                    if (window.transforms.rot13 && window.transforms.rot13.reverse) {
+                        const result = window.transforms.rot13.reverse(input);
+                        if (result !== input) {
+                            return { text: result, method: 'ROT13' };
+                        }
+                    }
+                    
+                    // Then try Caesar cipher
+                    if (window.transforms.caesar && window.transforms.caesar.reverse) {
+                        const result = window.transforms.caesar.reverse(input);
+                        if (result !== input) {
+                            return { text: result, method: 'Caesar Cipher' };
+                        }
+                    }
+                } catch (e) {
+                    console.error('Cipher decode error:', e);
+                }
+            }
+            
+            // - Base32
+            if (/^[A-Z2-7=]+$/.test(input.trim())) {
+                try {
+                    if (window.transforms.base32 && window.transforms.base32.reverse) {
+                        const result = window.transforms.base32.reverse(input);
+                        if (result && /[\x20-\x7E]{3,}/.test(result)) {
+                            return { text: result, method: 'Base32' };
+                        }
+                    }
+                } catch (e) {
+                    console.error('Base32 decode error:', e);
+                }
+            }
+            
+            // - ASCII85
+            if (/^<~.*~>$/.test(input.trim())) {
+                try {
+                    if (window.transforms.ascii85 && window.transforms.ascii85.reverse) {
+                        const result = window.transforms.ascii85.reverse(input);
+                        if (result && /[\x20-\x7E]{3,}/.test(result)) {
+                            return { text: result, method: 'ASCII85' };
+                        }
+                    }
+                } catch (e) {
+                    console.error('ASCII85 decode error:', e);
+                }
+            }
+            
+            // - Check for Zalgo text (text with combining marks)
+            const combiningMarksRegex = /[\u0300-\u036f\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]/;
+            if (combiningMarksRegex.test(input)) {
+                try {
+                    // Count the number of combining marks to ensure it's actually Zalgo text
+                    // and not just text with a few accents
+                    const matches = input.match(combiningMarksRegex) || [];
+                    if (matches.length > 3) { // Threshold to distinguish Zalgo from normal accented text
+                        // Fallback implementation to remove combining marks
+                        const result = input.replace(/[\u0300-\u036f\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]/g, '');
+                        if (result !== input && result.length > 0) {
+                            return { text: result, method: 'Zalgo' };
+                        }
+                    }
+                } catch (e) {
+                    console.error('Zalgo decode error:', e);
+                }
+            }
+            
+            // - Check for various Unicode text styles (medieval, cursive, monospace, double-struck)
+            const unicodeStyleChecks = [
+                { name: 'Medieval', transform: 'medieval' },
+                { name: 'Cursive', transform: 'cursive' },
+                { name: 'Monospace', transform: 'monospace' },
+                { name: 'Double-Struck', transform: 'doubleStruck' }
+            ];
+            
+            for (const style of unicodeStyleChecks) {
+                if (window.transforms[style.transform] && window.transforms[style.transform].map) {
+                    try {
+                        // Create reverse mapping
+                        const reverseMap = {};
+                        for (const [key, value] of Object.entries(window.transforms[style.transform].map)) {
+                            reverseMap[value] = key;
+                        }
+                        
+                        // Check if input contains characters from this style
+                        const styleChars = Object.values(window.transforms[style.transform].map);
+                        const hasStyleChars = styleChars.some(char => input.includes(char));
+                        
+                        if (hasStyleChars) {
+                            // Decode text
+                            let result = '';
+                            for (const char of input) {
+                                result += reverseMap[char] || char;
+                            }
+                            
+                            if (result !== input && /[a-zA-Z0-9]/.test(result)) {
+                                return { text: result, method: style.name };
+                            }
+                        }
+                    } catch (e) {
+                        console.error(`${style.name} decode error:`, e);
+                    }
+                }
+            }
+            
             // - Try reverse each transform that has a built-in reverse function
             for (const name in window.transforms) {
                 const transform = window.transforms[name];
@@ -698,11 +916,7 @@ window.app = new Vue({
             // Render the emoji grid
             window.emojiLibrary.renderEmojiGrid('emoji-grid-container', this.selectEmoji.bind(this), this.filteredEmojis);
             
-            // Add a bold message about copying
-            const copyNote = document.createElement('div');
-            copyNote.style.cssText = 'text-align: center; margin-top: 10px; font-weight: bold; padding: 5px; background-color: #f0f0f0; border-radius: 4px;';
-            copyNote.innerHTML = '<i class="fas fa-info-circle"></i> Clicking an emoji will automatically copy your hidden message';
-            container.appendChild(copyNote);
+            // Message about copying has been removed as requested
             
             // Log success
             console.log('Emoji grid rendered successfully');
@@ -715,6 +929,30 @@ window.app = new Vue({
         if (this.isDarkTheme) {
             document.body.classList.add('dark-theme');
         }
+        
+        // Add smooth scrolling for category navigation
+        this.$nextTick(() => {
+            const legendItems = document.querySelectorAll('.transform-category-legend .legend-item');
+            legendItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetId = item.getAttribute('data-target');
+                    if (targetId) {
+                        const targetElement = document.getElementById(targetId);
+                        if (targetElement) {
+                            // Add active class to the clicked legend item
+                            legendItems.forEach(li => li.classList.remove('active-category'));
+                            item.classList.add('active-category');
+                            
+                            // Scroll to the target element with smooth behavior
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    }
+                });
+            });
+        });
         
         // Initialize emoji grid with all emojis shown by default
         this.$nextTick(() => {

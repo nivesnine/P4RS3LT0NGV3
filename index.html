@@ -18,6 +18,14 @@
                 <h1>🐍 Parseltongue</h1>
             </div>
             <div class="actions">
+                <button
+                    @click="toggleCopyHistory"
+                    class="history-button"
+                    title="Show copy history"
+                    aria-label="Show copy history"
+                >
+                    <i class="fas fa-history"></i>
+                </button>
                 <button 
                     @click="toggleTheme" 
                     @keyup.d="toggleTheme"
@@ -51,9 +59,9 @@
                 <button 
                     :class="{ active: activeTab === 'steganography' }" 
                     @click="activeTab = 'steganography'"
-                    title="Hide text (H)"
+                    title="Hide text in emojis (H)"
                 >
-                    <i class="fas fa-eye-slash"></i> Hide
+                    <i class="fas fa-smile"></i> Emoji
                 </button>
             </div>
 
@@ -70,59 +78,32 @@
                     </div>
 
                     <div class="transform-section">
-                        <div class="transform-buttons">
-                            <button 
-                                v-for="carrier in carriers" 
-                                :key="carrier.name"
-                                class="transform-button"
-                                :class="{ active: selectedCarrier === carrier }"
-                                @click="selectCarrier(carrier)"
-                                :title="carrier.desc"
-                            >
-                                <div class="carrier-content">
-                                    <span class="carrier-emoji">{{ carrier.emoji }}</span>
-                                    <span class="carrier-name">{{ carrier.name }}</span>
-                                </div>
-                                <small class="transform-preview" v-if="emojiMessage">
-                                    <span class="preview-label">Preview:</span>
-                                    <span class="encoded-preview">{{ carrier.preview ? carrier.preview(emojiMessage.slice(0, 10)) : '' }}</span>
-                                    <span class="preview-ellipsis" v-if="emojiMessage.length > 10">...</span>
-                                </small>
-                            </button>
-                        </div>
-                        
-                        <!-- Big Invisible Text Button -->
-                        <button 
-                            class="transform-button invisible-button"
-                            :class="{ active: activeSteg === 'invisible' }"
-                            @click="setStegMode('invisible')"
-                            title="Make text invisible using zero-width characters"
-                        >
-                            <div class="carrier-content">
-                                <span class="carrier-emoji"><i class="fas fa-eye-slash"></i></span>
-                                <span class="carrier-name">Invisible Text Mode</span>
-                            </div>
-                            <small class="transform-preview" v-if="emojiMessage">
-                                <span class="preview-label">Preview:</span>
-                                <span class="encoded-preview">{{ previewInvisible(emojiMessage.slice(0, 10)) }}</span>
-                                <span class="preview-ellipsis" v-if="emojiMessage.length > 10">...</span>
-                            </small>
-                        </button>
                     </div>
 
                     <!-- Emoji Library Section -->
                     <div class="emoji-library">
                         <div class="emoji-library-header">
                             <div class="emoji-library-title">
-                                <i class="fas fa-icons"></i> Quick Emoji Picker
-                                <span class="emoji-library-subtitle">Click any emoji to insert it at cursor position</span>
-                            </div>
-                            <div class="emoji-search">
-                                <i class="fas fa-search"></i>
-                                <input type="text" placeholder="Search emojis..." v-model="emojiSearch" @input="filterEmojis">
+                                <h3><i class="fas fa-icons"></i> Choose an Emoji</h3>
                             </div>
                         </div>
-                        <div id="emoji-grid-container" class="emoji-grid-wrapper"></div>
+                        <!-- Emoji grid container - this MUST have id="emoji-grid-container" -->
+                        <div id="emoji-grid-container" class="emoji-grid-container">
+                            <!-- Dynamic content will be inserted here by JavaScript -->
+                            <div class="emoji-grid">
+                                <!-- Common emojis as fallback -->
+                                <button class="emoji-button" onclick="app.selectEmoji('😀')">😀</button>
+                                <button class="emoji-button" onclick="app.selectEmoji('😂')">😂</button>
+                                <button class="emoji-button" onclick="app.selectEmoji('🥰')">🥰</button>
+                                <button class="emoji-button" onclick="app.selectEmoji('😎')">😎</button>
+                                <button class="emoji-button" onclick="app.selectEmoji('🤔')">🤔</button>
+                                <button class="emoji-button" onclick="app.selectEmoji('👍')">👍</button>
+                                <button class="emoji-button" onclick="app.selectEmoji('🎉')">🎉</button>
+                                <button class="emoji-button" onclick="app.selectEmoji('🔥')">🔥</button>
+                                <button class="emoji-button" onclick="app.selectEmoji('🚀')">🚀</button>
+                                <button class="emoji-button" onclick="app.selectEmoji('🐍')">🐍</button>
+                            </div>
+                        </div>
                         <div class="emoji-library-footer" v-if="selectedEmoji">
                             <div class="selected-emoji-info">
                                 <span class="selected-emoji">{{ selectedEmoji }}</span>
@@ -151,17 +132,24 @@
                         </div>
                     </div>
 
-                    <div class="decode-section" v-if="showDecoder">
+                    
+                    <!-- Universal Decoder Section for Steganography Tab -->
+                    <div class="decode-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-magic"></i> Universal Decoder</h3>
+                            <p>Paste any encoded text to try all decoding methods at once</p>
+                        </div>
                         <div class="input-container">
                             <textarea 
-                                id="decode-input" 
-                                v-model="decodeInput" 
-                                placeholder="Paste encoded text to decode..."
-                                @input="autoDecode"
+                                id="universal-decode-input-steg" 
+                                v-model="universalDecodeInput" 
+                                placeholder="Paste encoded text to decode automatically..."
+                                @input="runUniversalDecode"
                             ></textarea>
-                            <div class="decoded-message" v-if="decodedMessage">
-                                {{ decodedMessage }}
-                                <button class="copy-button" @click="copyToClipboard(decodedMessage.substring(decodedMessage.indexOf(': ') + 2))" title="Copy decoded text">
+                            <div class="decoded-message" v-if="universalDecodeResult">
+                                <div class="decode-method">Decoded using: <strong>{{ universalDecodeResult.method }}</strong></div>
+                                <div class="decode-result">{{ universalDecodeResult.text }}</div>
+                                <button class="copy-button" @click="copyToClipboard(universalDecodeResult.text)" title="Copy decoded text">
                                     <i class="fas fa-copy"></i>
                                 </button>
                             </div>
@@ -183,22 +171,189 @@
                     </div>
 
                     <div class="transform-section">
-                        <div class="transform-buttons">
-                            <button 
-                                v-for="(transform, index) in transforms" 
-                                :key="transform.name" 
-                                @click="applyTransform(transform)"
-                                class="transform-button"
-                                :class="{ active: activeTransform === transform }"
-                                :title="transform.name + (index < 9 ? ' (' + (index + 1) + ')' : '')"
-                                :data-shortcut="index < 9 ? index + 1 : ''"
-                            >
-                                {{ transform.name }}
-                                <small class="transform-preview" v-if="transformInput">
-                                    {{ transform.preview(transformInput.slice(0, 10)) }}
-                                </small>
-                                <kbd v-if="index < 9">{{ index + 1 }}</kbd>
-                            </button>
+                        <div class="transform-category-legend">
+                            <div class="legend-title">Categories:</div>
+                            <div class="legend-item transform-category-encoding" data-target="category-encoding">Encoding</div>
+                            <div class="legend-item transform-category-cipher" data-target="category-cipher">Ciphers</div>
+                            <div class="legend-item transform-category-visual" data-target="category-visual">Visual</div>
+                            <div class="legend-item transform-category-format" data-target="category-format">Formatting</div>
+                            <div class="legend-item transform-category-unicode" data-target="category-unicode">Unicode</div>
+                            <div class="legend-item transform-category-special" data-target="category-special">Special</div>
+                        </div>
+                        <div class="transform-categories">
+                            <!-- Encoding Category -->
+                            <div id="category-encoding" class="transform-category-section">
+                                <h4 class="category-title transform-category-encoding">Encoding</h4>
+                                <div class="transform-buttons">
+                                    <div v-for="transform in getTransformsByCategory('encoding')" :key="transform.name" class="transform-button-group">
+                                        <button 
+                                            @click="applyTransform(transform)"
+                                            class="transform-button transform-category-encoding"
+                                            :class="{ active: activeTransform === transform }"
+                                            :title="'Click to transform and copy: ' + transform.name"
+                                        >
+                                            {{ transform.name }}
+                                            <small class="transform-preview" v-if="transformInput">
+                                                {{ transform.preview(transformInput.slice(0, 10)) }}
+                                            </small>
+                                            <i class="fas fa-copy auto-copy-icon"></i>
+                                        </button>
+                                        <button 
+                                            v-if="transformHasReverse(transform)"
+                                            @click="decodeWithTransform(transform)"
+                                            class="decode-button transform-category-encoding"
+                                            :title="'Click to decode using: ' + transform.name"
+                                        >
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Cipher Category -->
+                            <div id="category-cipher" class="transform-category-section">
+                                <h4 class="category-title transform-category-cipher">Ciphers</h4>
+                                <div class="transform-buttons">
+                                    <div v-for="transform in getTransformsByCategory('cipher')" :key="transform.name" class="transform-button-group">
+                                        <button 
+                                            @click="applyTransform(transform)"
+                                            class="transform-button transform-category-cipher"
+                                            :class="{ active: activeTransform === transform }"
+                                            :title="'Click to transform and copy: ' + transform.name"
+                                        >
+                                            {{ transform.name }}
+                                            <small class="transform-preview" v-if="transformInput">
+                                                {{ transform.preview(transformInput.slice(0, 10)) }}
+                                            </small>
+                                            <i class="fas fa-copy auto-copy-icon"></i>
+                                        </button>
+                                        <button 
+                                            v-if="transformHasReverse(transform)"
+                                            @click="decodeWithTransform(transform)"
+                                            class="decode-button transform-category-cipher"
+                                            :title="'Click to decode using: ' + transform.name"
+                                        >
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Visual Category -->
+                            <div id="category-visual" class="transform-category-section">
+                                <h4 class="category-title transform-category-visual">Visual</h4>
+                                <div class="transform-buttons">
+                                    <div v-for="transform in getTransformsByCategory('visual')" :key="transform.name" class="transform-button-group">
+                                        <button 
+                                            @click="applyTransform(transform)"
+                                            class="transform-button transform-category-visual"
+                                            :class="{ active: activeTransform === transform }"
+                                            :title="'Click to transform and copy: ' + transform.name"
+                                        >
+                                            {{ transform.name }}
+                                            <small class="transform-preview" v-if="transformInput">
+                                                {{ transform.preview(transformInput.slice(0, 10)) }}
+                                            </small>
+                                            <i class="fas fa-copy auto-copy-icon"></i>
+                                        </button>
+                                        <button 
+                                            v-if="transformHasReverse(transform)"
+                                            @click="decodeWithTransform(transform)"
+                                            class="decode-button transform-category-visual"
+                                            :title="'Click to decode using: ' + transform.name"
+                                        >
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Format Category -->
+                            <div id="category-format" class="transform-category-section">
+                                <h4 class="category-title transform-category-format">Formatting</h4>
+                                <div class="transform-buttons">
+                                    <div v-for="transform in getTransformsByCategory('format')" :key="transform.name" class="transform-button-group">
+                                        <button 
+                                            @click="applyTransform(transform)"
+                                            class="transform-button transform-category-format"
+                                            :class="{ active: activeTransform === transform }"
+                                            :title="'Click to transform and copy: ' + transform.name"
+                                        >
+                                            {{ transform.name }}
+                                            <small class="transform-preview" v-if="transformInput">
+                                                {{ transform.preview(transformInput.slice(0, 10)) }}
+                                            </small>
+                                            <i class="fas fa-copy auto-copy-icon"></i>
+                                        </button>
+                                        <button 
+                                            v-if="transformHasReverse(transform)"
+                                            @click="decodeWithTransform(transform)"
+                                            class="decode-button transform-category-format"
+                                            :title="'Click to decode using: ' + transform.name"
+                                        >
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Unicode Category -->
+                            <div id="category-unicode" class="transform-category-section">
+                                <h4 class="category-title transform-category-unicode">Unicode</h4>
+                                <div class="transform-buttons">
+                                    <div v-for="transform in getTransformsByCategory('unicode')" :key="transform.name" class="transform-button-group">
+                                        <button 
+                                            @click="applyTransform(transform)"
+                                            class="transform-button transform-category-unicode"
+                                            :class="{ active: activeTransform === transform }"
+                                            :title="'Click to transform and copy: ' + transform.name"
+                                        >
+                                            {{ transform.name }}
+                                            <small class="transform-preview" v-if="transformInput">
+                                                {{ transform.preview(transformInput.slice(0, 10)) }}
+                                            </small>
+                                            <i class="fas fa-copy auto-copy-icon"></i>
+                                        </button>
+                                        <button 
+                                            v-if="transformHasReverse(transform)"
+                                            @click="decodeWithTransform(transform)"
+                                            class="decode-button transform-category-unicode"
+                                            :title="'Click to decode using: ' + transform.name"
+                                        >
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Special Category -->
+                            <div id="category-special" class="transform-category-section">
+                                <h4 class="category-title transform-category-special">Special</h4>
+                                <div class="transform-buttons">
+                                    <div v-for="transform in getTransformsByCategory('special')" :key="transform.name" class="transform-button-group">
+                                        <button 
+                                            @click="applyTransform(transform)"
+                                            class="transform-button transform-category-special"
+                                            :class="{ active: activeTransform === transform }"
+                                            :title="'Click to transform and copy: ' + transform.name"
+                                        >
+                                            {{ transform.name }}
+                                            <small class="transform-preview" v-if="transformInput">
+                                                {{ transform.preview(transformInput.slice(0, 10)) }}
+                                            </small>
+                                            <i class="fas fa-copy auto-copy-icon"></i>
+                                        </button>
+                                        <button 
+                                            v-if="transformHasReverse(transform)"
+                                            @click="decodeWithTransform(transform)"
+                                            class="decode-button transform-category-special"
+                                            :title="'Click to decode using: ' + transform.name"
+                                        >
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -214,10 +369,63 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Universal Decoder Section for Transforms Tab -->
+                    <div class="decode-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-magic"></i> Universal Decoder</h3>
+                            <p>Paste any encoded text to try all decoding methods at once</p>
+                        </div>
+                        <div class="input-container">
+                            <textarea 
+                                id="universal-decode-input-transforms" 
+                                v-model="universalDecodeInput" 
+                                placeholder="Paste encoded text to decode automatically..."
+                                @input="runUniversalDecode"
+                            ></textarea>
+                            <div class="decoded-message" v-if="universalDecodeResult">
+                                <div class="decode-method">Decoded using: <strong>{{ universalDecodeResult.method }}</strong></div>
+                                <div class="decode-result">{{ universalDecodeResult.text }}</div>
+                                <button class="copy-button" @click="copyToClipboard(universalDecodeResult.text)" title="Copy decoded text">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
 
+            <!-- Copy History Panel -->
+            <div class="copy-history-panel" :class="{ 'active': showCopyHistory }">
+                <div class="copy-history-header">
+                    <h3><i class="fas fa-history"></i> Copy History</h3>
+                    <button class="close-button" @click="toggleCopyHistory" title="Close history">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="copy-history-content">
+                    <div v-if="copyHistory.length === 0" class="no-history">
+                        <p>No copy history yet. Use the app features to auto-copy content.</p>
+                    </div>
+                    <div v-else class="history-items">
+                        <div v-for="(item, index) in copyHistory" :key="index" class="history-item">
+                            <div class="history-item-header">
+                                <span class="history-source">{{ item.source }}</span>
+                                <span class="history-time">{{ item.timestamp }}</span>
+                            </div>
+                            <div class="history-content">
+                                {{ item.content }}
+                            </div>
+                            <div class="history-actions">
+                                <button class="copy-again-button" @click="copyToClipboard(item.content)" title="Copy again">
+                                    <i class="fas fa-copy"></i> Copy Again
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -225,5 +433,75 @@
     <script src="js/steganography.js"></script>
     <script src="js/emojiLibrary.js"></script>
     <script src="js/app.js"></script>
+    
+    <!-- Force emoji grid rendering -->
+    <script>
+        // Function to initialize emoji grid with retries
+        function initEmojiGrid(retryCount) {
+            retryCount = retryCount || 0;
+            const maxRetries = 5;
+            
+            console.log('Initializing emoji grid, attempt:', retryCount + 1);
+            
+            // Get the emoji library element
+            const emojiLibrary = document.querySelector('.emoji-library');
+            
+            // Access the emoji grid container without forcing styles
+            const emojiGridContainer = document.getElementById('emoji-grid-container');
+            if (emojiGridContainer) {
+                console.log('Found emoji grid container, initializing...');
+                // Only set content, let CSS handle display
+                emojiGridContainer.innerHTML = '<div class="loading-emojis">Loading emoji grid...</div>';
+                
+                // Manually render emoji grid
+                if (window.emojiLibrary && window.emojiLibrary.renderEmojiGrid) {
+                    try {
+                        window.emojiLibrary.renderEmojiGrid('emoji-grid-container', function(emoji) {
+                            // Simulate emoji selection by calling the Vue method if possible
+                            const app = document.getElementById('app').__vue__;
+                            if (app && app.selectEmoji) {
+                                app.selectEmoji(emoji);
+                            }
+                        });
+                        console.log('Emoji grid successfully rendered');
+                    } catch (error) {
+                        console.error('Error rendering emoji grid:', error);
+                    }
+                } else {
+                    console.warn('Emoji library not yet available, will retry');
+                    if (retryCount < maxRetries) {
+                        setTimeout(() => initEmojiGrid(retryCount + 1), 500);
+                    }
+                }
+            } else {
+                console.warn('Emoji grid container not found, will retry');
+                if (retryCount < maxRetries) {
+                    setTimeout(() => initEmojiGrid(retryCount + 1), 500);
+                }
+            }
+        }
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // First attempt after a short delay to ensure Vue has initialized
+            setTimeout(initEmojiGrid, 500);
+            
+            // Also initialize when switching to the steganography tab
+            const app = document.getElementById('app');
+            if (app && app.__vue__) {
+                const vue = app.__vue__;
+                // Watch for tab changes
+                const originalWatch = vue.$watch;
+                if (originalWatch) {
+                    vue.$watch('activeTab', function(newTab) {
+                        if (newTab === 'steganography') {
+                            console.log('Switched to steganography tab, initializing emoji grid');
+                            setTimeout(initEmojiGrid, 100);
+                        }
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>

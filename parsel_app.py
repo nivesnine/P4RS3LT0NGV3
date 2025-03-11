@@ -12,7 +12,7 @@ from typing import List, Dict, Optional
 from string import ascii_lowercase
 
 # Import additional transformations
-from more_transforms_fixed import (
+from text_transforms import (
     to_upside_down, to_elder_futhark, to_vaporwave, to_zalgo,
     to_unicode_circled, to_small_caps, to_braille
 )
