@@ -455,14 +455,10 @@ window.emojiLibrary.renderEmojiGrid = function(containerId, onEmojiSelect, filte
     // Clear container
     container.innerHTML = '';
     
-    // Apply styles to container to prevent black bars
-    container.style.cssText = 'box-shadow: none !important; border: none !important; background-image: none !important;';
-    
     // Create grid note
     const gridNote = document.createElement('div');
     gridNote.className = 'emoji-grid-note';
     gridNote.innerHTML = '<i class="fas fa-magic"></i> Click any emoji to automatically copy your hidden message';
-    gridNote.style.cssText = 'box-shadow: none !important; border-bottom: none !important; border-top: none !important; border-right: none !important; background-image: none !important;';
     container.appendChild(gridNote);
     
     // Create category tabs
@@ -486,7 +482,6 @@ window.emojiLibrary.renderEmojiGrid = function(containerId, onEmojiSelect, filte
     // Create emoji grid with enforced styling
     const gridContainer = document.createElement('div');
     gridContainer.className = 'emoji-grid';
-    gridContainer.style.cssText = 'box-shadow: none !important; border-bottom: none !important; border-top: none !important; background-image: none !important;';
     
     // Combine all emojis for a larger selection
     const allEmojis = [...window.emojiLibrary.EMOJI_LIST, ...window.emojiLibrary.ADDITIONAL_EMOJIS];

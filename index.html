@@ -6,7 +6,6 @@
     <title>Parseltongue 2.0 - LLM Payload Crafter</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/notification.css">
-    <link rel="stylesheet" href="css/no-black-bar.css">
     <!-- Vue.js -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <!-- Font Awesome for icons -->
@@ -82,16 +81,16 @@
                     </div>
 
                     <!-- Emoji Library Section -->
-                    <div class="emoji-library" style="box-shadow: none !important; border: 1px solid var(--input-border) !important; background-image: none !important;">
-                        <div class="emoji-library-header" style="box-shadow: none !important; border: none !important; background-image: none !important;">
+                    <div class="emoji-library">
+                        <div class="emoji-library-header">
                             <div class="emoji-library-title">
                                 <h3><i class="fas fa-icons"></i> Choose an Emoji</h3>
                             </div>
                         </div>
                         <!-- Emoji grid container - this MUST have id="emoji-grid-container" -->
-                        <div id="emoji-grid-container" class="emoji-grid-container" style="box-shadow: none !important; border: none !important; background-image: none !important;">
+                        <div id="emoji-grid-container" class="emoji-grid-container">
                             <!-- Dynamic content will be inserted here by JavaScript -->
-                            <div class="emoji-grid" style="box-shadow: none !important; border: none !important; background-image: none !important;">
+                            <div class="emoji-grid">
                                 <!-- Common emojis as fallback -->
                                 <button class="emoji-button" onclick="app.selectEmoji('😀')">😀</button>
                                 <button class="emoji-button" onclick="app.selectEmoji('😂')">😂</button>
@@ -105,7 +104,7 @@
                                 <button class="emoji-button" onclick="app.selectEmoji('🐍')">🐍</button>
                             </div>
                         </div>
-                        <div class="emoji-library-footer" v-if="selectedEmoji" style="box-shadow: none !important; border: none !important; background-image: none !important;">
+                        <div class="emoji-library-footer" v-if="selectedEmoji">
                             <div class="selected-emoji-info">
                                 <span class="selected-emoji">{{ selectedEmoji }}</span>
                                 <span class="selected-emoji-label">Last selected</span>

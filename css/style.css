@@ -208,7 +208,7 @@ textarea {
     border-radius: 6px;
     padding: 12px;
     border: 1px solid var(--input-border);
-    box-shadow: none !important;
+    box-shadow: none;
 }
 
 .emoji-library-header {
@@ -316,10 +316,9 @@ textarea {
     border-radius: 10px;
     background-color: var(--secondary-bg);
     padding: 0;
-    box-shadow: none !important;
+    box-shadow: none;
     position: relative;
     overflow: hidden;
-    border: 1px solid var(--input-border) !important;
 }
 
 .emoji-library:before {
@@ -331,7 +330,6 @@ textarea {
     height: 4px;
     background: linear-gradient(to right, var(--unicode-color), var(--special-color), var(--encoding-color));
     z-index: 1;
-    box-shadow: none !important;
 }
 
 .emoji-grid-wrapper {
@@ -362,8 +360,6 @@ textarea {
     border-bottom: none !important;
     border-top: none !important;
     border-right: none !important;
-    position: relative;
-    z-index: 10;
 }
 
 .emoji-grid-note i {
@@ -1390,30 +1386,4 @@ button:hover {
         width: 100%;
         text-align: left;
     }
-}
-
-/* Fix for black bar in emoji grid */
-.emoji-library *,
-.emoji-grid-container *,
-.emoji-grid * {
-    box-shadow: none !important;
-    border-bottom: none !important;
-}
-
-.emoji-library::after,
-.emoji-library::before,
-.emoji-grid-container::after,
-.emoji-grid-container::before,
-.emoji-grid::after,
-.emoji-grid::before {
-    box-shadow: none !important;
-    border: none !important;
-    background-image: none !important;
-}
-
-/* Force remove any black bars */
-#emoji-grid-container::before,
-#emoji-grid-container::after {
-    display: none !important;
-    content: none !important;
 }

@@ -901,19 +901,13 @@ window.app = new Vue({
                 return;
             }
             
-            // Force container to be completely visible and remove black bars
-            container.style.cssText = 'display: block !important; visibility: visible !important; min-height: 300px; box-shadow: none !important; border: none !important; background-image: none !important;';
+            // Force container to be completely visible
+            container.style.cssText = 'display: block !important; visibility: visible !important; min-height: 300px;';
             
-            // Make sure parent containers are visible too and have no black bars
+            // Make sure parent containers are visible too
             const emojiLibrary = document.querySelector('.emoji-library');
             if (emojiLibrary) {
-                emojiLibrary.style.cssText = 'display: block !important; visibility: visible !important; box-shadow: none !important; border: 1px solid var(--input-border) !important; background-image: none !important;';
-            }
-            
-            // Remove any black bars from emoji library header
-            const emojiLibraryHeader = document.querySelector('.emoji-library-header');
-            if (emojiLibraryHeader) {
-                emojiLibraryHeader.style.cssText = 'box-shadow: none !important; border: none !important; background-image: none !important;';
+                emojiLibrary.style.cssText = 'display: block !important; visibility: visible !important;';
             }
             
             // Clear any existing content to avoid duplication
