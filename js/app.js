@@ -16,9 +16,9 @@ window.app = new Vue({
         transformCategories: {
             encoding: ['Base64', 'Base32', 'Binary', 'Hexadecimal', 'ASCII85', 'URL Encode', 'HTML Entities'],
             cipher: ['Caesar Cipher', 'ROT13', 'ROT47', 'Morse Code'],
-            visual: ['Rainbow Text', 'Strikethrough', 'Underline', 'Reverse Text', 'Wingdings Style'],
-            format: ['Pig Latin', 'Leetspeak', 'NATO Phonetic', 'Greek Letters'],
-            unicode: ['Invisible Text', 'Upside Down', 'Full Width', 'Small Caps', 'Bubble', 'Braille'],
+            visual: ['Rainbow Text', 'Strikethrough', 'Underline', 'Reverse Text'],
+            format: ['Pig Latin', 'Leetspeak', 'NATO Phonetic'],
+            unicode: ['Invisible Text', 'Upside Down', 'Full Width', 'Small Caps', 'Bubble', 'Braille', 'Greek Letters', 'Wingdings'],
             special: ['Medieval', 'Cursive', 'Monospace', 'Double-Struck', 'Elder Futhark', 'Mirror Text', 'Zalgo']
         },
         transforms: Object.entries(window.transforms).map(([key, transform]) => ({
@@ -78,6 +78,13 @@ window.app = new Vue({
                     } else {
                         console.log('Emoji grid container not found after tab switch');
                     }
+                });
+            }
+            
+            // Initialize category navigation when switching to transforms tab
+            if (tabName === 'transforms') {
+                this.$nextTick(() => {
+                    this.initializeCategoryNavigation();
                 });
             }
         },
@@ -739,25 +746,11 @@ window.app = new Vue({
         universalDecode(input) {
             if (!input) return '';
             
-            // If we're in the steganography tab, only try emoji decoding
-            if (this.activeTab === 'steganography') {
-                if (/[\u{1F300}-\u{1F6FF}\u{2600}-\u{26FF}]/u.test(input)) {
-                    console.log('In emoji tab: attempting emoji decode only...');
-                    const decoded = window.steganography.decodeEmoji(input);
-                    if (decoded) {
-                        console.log('Successfully decoded emoji:', decoded);
-                        return { text: decoded, method: 'Emoji Steganography' };
-                    } else {
-                        console.log('No hidden message found in emoji');
-                        return null;
-                    }
-                }
-                return null;
-            }
+            // Try all decoders in order
             
-            // For other tabs, try all decoders in order
             // 1. Try steganography decoders
             // - Check for emoji steganography first
+            // The emoji encoding uses variation selectors which are hard to see
             if (/[\u{1F300}-\u{1F6FF}\u{2600}-\u{26FF}]/u.test(input)) {
                 console.log('Detected emoji, attempting to decode...');
                 const decoded = window.steganography.decodeEmoji(input);
@@ -1161,10 +1154,29 @@ window.app = new Vue({
         },
         
         selectEmoji(emoji) {
-            // Directly copy the emoji to clipboard
-            this.forceCopyToClipboard(emoji);
-            this.showNotification(`<i class="fas fa-check"></i> Emoji copied!`, 'success');
-            this.addToCopyHistory('Emoji', emoji);
+            // Directly copy the emoji to clipboard - ensure it's a string
+            const emojiStr = String(emoji);
+            
+            // Special handling for emoji characters
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(emojiStr)
+                    .then(() => {
+                        this.showNotification(`<i class="fas fa-check"></i> Emoji copied!`, 'success');
+                        this.addToCopyHistory('Emoji', emojiStr);
+                    })
+                    .catch(err => {
+                        console.warn('Emoji clipboard API failed:', err);
+                        // Fallback to our custom method
+                        this.forceCopyToClipboard(emojiStr);
+                        this.showNotification(`<i class="fas fa-check"></i> Emoji copied!`, 'success');
+                        this.addToCopyHistory('Emoji', emojiStr);
+                    });
+            } else {
+                // Use our custom method if Clipboard API not available
+                this.forceCopyToClipboard(emojiStr);
+                this.showNotification(`<i class="fas fa-check"></i> Emoji copied!`, 'success');
+                this.addToCopyHistory('Emoji', emojiStr);
+            }
             
             // Also set up carrier if we're in steganography mode
             if (this.activeTab === 'steganography') {
@@ -1190,9 +1202,28 @@ window.app = new Vue({
                     // Wait for encoding to complete, then copy to clipboard
                     this.$nextTick(() => {
                         if (this.encodedMessage) {
-                            this.forceCopyToClipboard(this.encodedMessage);
-                            this.showNotification(`<i class="fas fa-check"></i> Hidden message copied with ${emoji}`, 'success');
-                            this.addToCopyHistory(`Hidden Message with ${emoji}`, this.encodedMessage);
+                            const encodedStr = String(this.encodedMessage);
+                            
+                            // Use native clipboard API first for better emoji support
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                                navigator.clipboard.writeText(encodedStr)
+                                    .then(() => {
+                                        this.showNotification(`<i class="fas fa-check"></i> Hidden message copied with ${emoji}`, 'success');
+                                        this.addToCopyHistory(`Hidden Message with ${emoji}`, encodedStr);
+                                    })
+                                    .catch(err => {
+                                        console.warn('Encoded emoji clipboard API failed:', err);
+                                        // Fall back to our custom method
+                                        this.forceCopyToClipboard(encodedStr);
+                                        this.showNotification(`<i class="fas fa-check"></i> Hidden message copied with ${emoji}`, 'success');
+                                        this.addToCopyHistory(`Hidden Message with ${emoji}`, encodedStr);
+                                    });
+                            } else {
+                                // Use our custom method if Clipboard API not available
+                                this.forceCopyToClipboard(encodedStr);
+                                this.showNotification(`<i class="fas fa-check"></i> Hidden message copied with ${emoji}`, 'success');
+                                this.addToCopyHistory(`Hidden Message with ${emoji}`, encodedStr);
+                            }
                         }
                     });
                 }
@@ -1228,6 +1259,49 @@ window.app = new Vue({
             
             // Log success
             console.log('Emoji grid rendered successfully');
+        },
+        
+        // Initialize category navigation for transform sections
+        initializeCategoryNavigation() {
+            this.$nextTick(() => {
+                console.log('Initializing category navigation');
+                const legendItems = document.querySelectorAll('.transform-category-legend .legend-item');
+                
+                // First, remove any existing event listeners to prevent duplicates
+                legendItems.forEach(item => {
+                    const newItem = item.cloneNode(true);
+                    item.parentNode.replaceChild(newItem, item);
+                });
+                
+                // Now add event listeners to the fresh elements
+                document.querySelectorAll('.transform-category-legend .legend-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const targetId = item.getAttribute('data-target');
+                        if (targetId) {
+                            const targetElement = document.getElementById(targetId);
+                            if (targetElement) {
+                                // Add active class to the clicked legend item
+                                document.querySelectorAll('.transform-category-legend .legend-item').forEach(li => {
+                                    li.classList.remove('active-category');
+                                });
+                                item.classList.add('active-category');
+                                
+                                // Jump directly to the target element
+                                targetElement.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'start'
+                                });
+                                
+                                // Highlight the section briefly to draw attention
+                                targetElement.classList.add('highlight-section');
+                                setTimeout(() => {
+                                    targetElement.classList.remove('highlight-section');
+                                }, 1000);
+                            }
+                        }
+                    });
+                });
+            });
         }
     },
     // Initialize theme and components
@@ -1238,29 +1312,8 @@ window.app = new Vue({
             document.body.classList.add('dark-theme');
         }
         
-        // Add smooth scrolling for category navigation
-        this.$nextTick(() => {
-            const legendItems = document.querySelectorAll('.transform-category-legend .legend-item');
-            legendItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    const targetId = item.getAttribute('data-target');
-                    if (targetId) {
-                        const targetElement = document.getElementById(targetId);
-                        if (targetElement) {
-                            // Add active class to the clicked legend item
-                            legendItems.forEach(li => li.classList.remove('active-category'));
-                            item.classList.add('active-category');
-                            
-                            // Scroll to the target element with smooth behavior
-                            targetElement.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'start'
-                            });
-                        }
-                    }
-                });
-            });
-        });
+        // Initialize category navigation
+        this.initializeCategoryNavigation();
         
         // Initialize emoji grid with all emojis shown by default
         this.$nextTick(() => {

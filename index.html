@@ -368,6 +368,13 @@
                     </div>
 
                     <div class="output-section" v-if="transformOutput">
+                        <div class="output-heading">
+                            <h4>
+                                <i class="fas fa-check-circle"></i> 
+                                Transformed Message
+                                <small v-if="activeTransform">({{ activeTransform.name }})</small>
+                            </h4>
+                        </div>
                         <div class="output-container">
                             <textarea 
                                 readonly 
@@ -377,6 +384,9 @@
                             <button class="copy-button" @click="copyToClipboard(transformOutput)" title="Copy to clipboard">
                                 <i class="fas fa-copy"></i>
                             </button>
+                        </div>
+                        <div class="output-instructions">
+                            <small><i class="fas fa-info-circle"></i> Copy this text and share it. The transformation can be reversed using the Universal Decoder below.</small>
                         </div>
                     </div>
 
