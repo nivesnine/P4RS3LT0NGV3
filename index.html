@@ -173,6 +173,15 @@
                                 Auto-copy
                                 <input type="checkbox" v-model="tbAutoCopy" />
                             </label>
+                        </div>
+                        <!-- Live estimate before generation -->
+                        <div class="output-instructions">
+                            <small>
+                                Estimated length: {{ estimateTokenadeLength().toLocaleString() }} chars
+                            </small>
+                        </div>
+                        <!-- Single carrier embedding mode -->
+                        <div class="tokenade-carrier-options options-grid">
                             <label title="Condense payload into a single emoji carrier">
                                 Single carrier mode
                                 <input type="checkbox" v-model="tbSingleCarrier" />
@@ -205,9 +214,9 @@
                             <button class="copy-button" v-if="tokenBombOutput" @click="copyToClipboard(tokenBombOutput)">
                                 <i class="fas fa-copy"></i> Copy
                             </button>
-                            <div class="output-instructions">
+                            <div class="output-instructions" v-if="tokenBombOutput">
                                 <small>
-                                    Estimated length: {{ estimateTokenadeLength().toLocaleString() }} chars
+                                    Length: {{ tokenBombOutput.length.toLocaleString() }} chars · Tip: Increasing depth/breadth grows size <em>multiplicatively</em>.
                                 </small>
                             </div>
                         </div>

@@ -61,9 +61,6 @@ window.app = new Vue({
         tbIncludeNoise: true,
         tbRandomizeEmojis: true,
         tbAutoCopy: false,
-        tbSingleCarrier: false,
-        tbCarrier: '',
-        tbPayloadEmojis: [],
         tokenBombOutput: '',
         
         // History of copied content
@@ -1684,7 +1681,7 @@ window.app = new Vue({
             const depth = Math.max(1, Math.min(8, Number(this.tbDepth) || 1));
             const breadth = Math.max(1, Math.min(12, Number(this.tbBreadth) || 1));
             const repeats = Math.max(1, Math.min(100, Number(this.tbRepeats) || 1));
-            const sep = this.tbSeparator === 'zwj' ? '\u200D'.replace('\\u','\u') : this.tbSeparator === 'zwnj' ? '\u200C'.replace('\\u','\u') : this.tbSeparator === 'zwsp' ? '\u200B'.replace('\\u','\u') : '';
+            const sep = this.tbSeparator === 'zwj' ? '\u200D' : this.tbSeparator === 'zwnj' ? '\u200C' : this.tbSeparator === 'zwsp' ? '\u200B' : '';
             const includeVS = !!this.tbIncludeVS;
             const includeNoise = !!this.tbIncludeNoise;
             const randomize = !!this.tbRandomizeEmojis;
@@ -1703,8 +1700,8 @@ window.app = new Vue({
             function addVS(str) {
                 if (!includeVS) return str;
                 // Alternate VS16/VS15 to maximize tokenization churn
-                const vs16 = '\uFE0F'.replace('\\u','\u');
-                const vs15 = '\uFE0E'.replace('\\u','\u');
+                const vs16 = '\uFE0F';
+                const vs15 = '\uFE0E';
                 let out = '';
                 for (let i = 0; i < str.length; i++) {
                     const ch = str[i];
@@ -1715,7 +1712,7 @@ window.app = new Vue({
 
             function noise() {
                 if (!includeNoise) return '';
-                const parts = ['\u200B'.replace('\\u','\u'),'\u200C'.replace('\\u','\u'),'\u200D'.replace('\\u','\u'),'\u2060'.replace('\\u','\u'),'\u2062'.replace('\\u','\u'),'\u2063'.replace('\\u','\u')];
+                const parts = ['\u200B','\u200C','\u200D','\u2060','\u2062','\u2063'];
                 let s = '';
                 const n = 1 + Math.floor(Math.random() * 3);
                 for (let i = 0; i < n; i++) s += parts[Math.floor(Math.random() * parts.length)];
@@ -1734,55 +1731,14 @@ window.app = new Vue({
                 }
                 return items.join(sep);
             }
-            if (this.tbSingleCarrier) {
-                const carrier = (this.tbCarrier && String(this.tbCarrier)) || (this.selectedEmoji ? String(this.selectedEmoji) : '💥');
-                function countUnits(level) {
-                    if (level === 0) return breadth;
-                    return breadth * countUnits(level - 1);
-                }
-                const unitsPerBlock = countUnits(depth - 1);
-                const totalUnits = Math.max(1, repeats * unitsPerBlock);
 
-                let payload = [];
-                if (this.tbPayloadEmojis && this.tbPayloadEmojis.length > 0) {
-                    for (let i = 0; i < totalUnits; i++) {
-                        payload.push(String(this.tbPayloadEmojis[i % this.tbPayloadEmojis.length]));
-                    }
-                } else {
-                    payload = pickEmojis(totalUnits);
-                }
-
-                function toTagSeqForEmojiChar(ch) {
-                    const cp = ch.codePointAt(0);
-                    const hex = cp.toString(16);
-                    let seq = '';
-                    for (const d of hex) {
-                        if (d >= '0' && d <= '9') {
-                            const base = 0xE0030 + (d.charCodeAt(0) - '0'.charCodeAt(0));
-                            seq += String.fromCodePoint(base);
-                        } else {
-                            const base = 0xE0061 + (d.charCodeAt(0) - 'a'.charCodeAt(0));
-                            seq += String.fromCodePoint(base);
-                        }
-                    }
-                    seq += String.fromCodePoint(0xE007F);
-                    return seq;
-                }
-
-                const vs16 = includeVS ? '\uFE0F'.replace('\\u','\u') : '';
-                let out = carrier + vs16;
-                for (let i = 0; i < payload.length; i++) {
-                    out += sep + toTagSeqForEmojiChar(payload[i]) + noise();
-                }
-                this.tokenBombOutput = out;
-            } else {
-                let block = buildLevel(depth - 1);
-                const blocks = [];
-                for (let i = 0; i < repeats; i++) {
-                    blocks.push(block + noise());
-                }
-                this.tokenBombOutput = blocks.join(sep);
+            let block = buildLevel(depth - 1);
+            // Repeat the block to increase token length
+            const blocks = [];
+            for (let i = 0; i < repeats; i++) {
+                blocks.push(block + noise());
             }
+            this.tokenBombOutput = blocks.join(sep);
 
             // Provide a quick visual confirmation
             this.showNotification('<i class="fas fa-bomb"></i> Tokenade generated', 'success');
@@ -1804,57 +1760,6 @@ window.app = new Vue({
                 this.tbIncludeVS = true; this.tbIncludeNoise = true; this.tbRandomizeEmojis = true;
             }
             this.showNotification('<i class="fas fa-sliders-h"></i> Preset applied', 'success');
-        },
-
-        estimateTokenadeLength() {
-            const depth = Math.max(1, Math.min(8, Number(this.tbDepth) || 1));
-            const breadth = Math.max(1, Math.min(12, Number(this.tbBreadth) || 1));
-            const repeats = Math.max(1, Math.min(100, Number(this.tbRepeats) || 1));
-            const sepLen = this.tbSeparator === 'none' ? 0 : 1;
-            const vsPerEmoji = this.tbIncludeVS ? 1 : 0;
-            const noiseAvg = this.tbIncludeNoise ? 2 : 0;
-
-            function lenLevel(level) {
-                if (level === 0) {
-                    return breadth * (1 + vsPerEmoji);
-                }
-                const inner = lenLevel(level - 1);
-                return breadth * (inner + noiseAvg) + Math.max(0, breadth - 1) * sepLen;
-            }
-
-            if (this.tbSingleCarrier) {
-                function countUnits(level) { return level === 0 ? breadth : breadth * countUnits(level - 1); }
-                const unitsPerBlock = countUnits(depth - 1);
-                const totalUnits = Math.max(1, repeats * unitsPerBlock);
-                const avgDigits = 5;
-                const perUnit = avgDigits + 1 + sepLen + (this.tbIncludeNoise ? 2 : 0);
-                const carrierLen = 1 + (this.tbIncludeVS ? 1 : 0);
-                return carrierLen + totalUnits * perUnit;
-            } else {
-                const blockLen = lenLevel(depth - 1);
-                return repeats * (blockLen + noiseAvg) + Math.max(0, repeats - 1) * sepLen;
-            }
-        },
-
-        setCarrierFromSelected() {
-            if (this.selectedEmoji) this.tbCarrier = String(this.selectedEmoji);
-        },
-        clearTokenadePayload() { this.tbPayloadEmojis = []; },
-        removeTokenadePayloadAt(idx) { this.tbPayloadEmojis.splice(idx, 1); },
-        handleTokenadeDrop(e) {
-            e.preventDefault();
-            const text = e.dataTransfer && (e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('text'));
-            if (!text) return;
-            const parts = window.emojiLibrary.splitEmojis(text);
-            const onlyEmojis = parts.filter(p => /\p{Extended_Pictographic}/u.test(p));
-            this.tbPayloadEmojis.push(...onlyEmojis);
-        },
-        handleTokenadePaste(e) {
-            const text = (e.clipboardData && e.clipboardData.getData('text')) || '';
-            if (!text) return;
-            const parts = window.emojiLibrary.splitEmojis(text);
-            const onlyEmojis = parts.filter(p => /\p{Extended_Pictographic}/u.test(p));
-            this.tbPayloadEmojis.push(...onlyEmojis);
         }
     },
     // Initialize theme and components

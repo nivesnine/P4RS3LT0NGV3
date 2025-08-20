@@ -1928,6 +1928,21 @@ html {
     scroll-behavior: smooth;
 }
 
+/* Tokenade presets: horizontal layout */
+.tokenade-presets {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 8px 0;
+}
+.tokenade-presets > label {
+    margin-right: 4px;
+}
+.tokenade-presets .transform-button {
+    padding: 6px 10px;
+}
+
 .transform-layout {
     position: relative;
 }
