@@ -173,6 +173,30 @@
                                 Auto-copy
                                 <input type="checkbox" v-model="tbAutoCopy" />
                             </label>
+                            <label title="Condense payload into a single emoji carrier">
+                                Single carrier mode
+                                <input type="checkbox" v-model="tbSingleCarrier" />
+                            </label>
+                            <label v-if="tbSingleCarrier" title="Pick the carrier emoji">
+                                Carrier
+                                <input type="text" v-model="tbCarrier" placeholder="Drop or type an emoji" @focus="setCarrierFromSelected" />
+                            </label>
+                        </div>
+                        <div v-if="tbSingleCarrier" class="tokenade-payload-drop">
+                            <div class="drop-zone" 
+                                 @dragover.prevent 
+                                 @drop="handleTokenadeDrop"
+                                 @paste="handleTokenadePaste"
+                                 title="Drag/Drop or paste emojis here to embed into the carrier">
+                                Drop or paste emojis to embed →
+                            </div>
+                            <div class="payload-list" v-if="tbPayloadEmojis.length">
+                                <div class="payload-item" v-for="(em, idx) in tbPayloadEmojis" :key="idx">
+                                    <span class="payload-emoji">{{ em }}</span>
+                                    <button class="decode-button" @click="removeTokenadePayloadAt(idx)" title="Remove">✖</button>
+                                </div>
+                                <button class="decode-button" @click="clearTokenadePayload" title="Clear all">Clear</button>
+                            </div>
                         </div>
                         <div class="token-bomb-actions">
                             <button class="transform-button" @click="generateTokenBomb" title="Build the tokenade with current settings">
@@ -181,9 +205,9 @@
                             <button class="copy-button" v-if="tokenBombOutput" @click="copyToClipboard(tokenBombOutput)">
                                 <i class="fas fa-copy"></i> Copy
                             </button>
-                            <div class="output-instructions" v-if="tokenBombOutput">
+                            <div class="output-instructions">
                                 <small>
-                                    Length: {{ tokenBombOutput.length.toLocaleString() }} chars · Tip: Increasing depth/breadth grows size <em>multiplicatively</em>.
+                                    Estimated length: {{ estimateTokenadeLength().toLocaleString() }} chars
                                 </small>
                             </div>
                         </div>
