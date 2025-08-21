@@ -54,6 +54,7 @@ window.app = new Vue({
         selectedEmoji: null,
         carrierEmojiList: [...window.emojiLibrary.EMOJI_LIST],
         quickCarrierEmojis: ['🐍','🐉','🐲','🔥','💥','🗿','⚓','⭐','✨','🚀','💀','🪨','🍃','🪶','🔮','🐢','🐊','🦎','🐍'],
+        tbCarrierManual: '',
         // Token Bomb Generator
         tbDepth: 3,
         tbBreadth: 4,
@@ -1744,7 +1745,8 @@ window.app = new Vue({
             }
 
             if (this.tbSingleCarrier) {
-                const carrier = (this.tbCarrier && String(this.tbCarrier)) || (this.selectedEmoji ? String(this.selectedEmoji) : '💥');
+                const manual = (this.tbCarrierManual || '').trim();
+                const carrier = manual || (this.tbCarrier && String(this.tbCarrier)) || (this.selectedEmoji ? String(this.selectedEmoji) : '💥');
                 function countUnits(level) {
                     if (level === 0) return breadth;
                     return breadth * countUnits(level - 1);
@@ -1753,13 +1755,7 @@ window.app = new Vue({
                 const totalUnits = Math.max(1, repeats * unitsPerBlock);
 
                 let payload = [];
-                if (this.tbPayloadEmojis && this.tbPayloadEmojis.length > 0) {
-                    for (let i = 0; i < totalUnits; i++) {
-                        payload.push(String(this.tbPayloadEmojis[i % this.tbPayloadEmojis.length]));
-                    }
-                } else {
-                    payload = pickEmojis(totalUnits);
-                }
+                payload = pickEmojis(totalUnits);
 
                 function toTagSeqForEmojiChar(ch) {
                     const cp = ch.codePointAt(0);

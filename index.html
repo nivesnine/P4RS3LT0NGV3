@@ -267,22 +267,11 @@
                                     <option v-for="em in carrierEmojiList" :key="em" :value="em">{{ em }}</option>
                                 </select>
                             </label>
-                        </div>
-                        <div v-if="tbSingleCarrier" class="tokenade-payload-drop">
-                            <div class="drop-zone" 
-                                 @dragover.prevent 
-                                 @drop="handleTokenadeDrop"
-                                 @paste="handleTokenadePaste"
-                                 title="Drag/Drop or paste emojis here to embed into the carrier">
-                                Drop or paste emojis to embed →
-                            </div>
-                            <div class="payload-list" v-if="tbPayloadEmojis.length">
-                                <div class="payload-item" v-for="(em, idx) in tbPayloadEmojis" :key="idx">
-                                    <span class="payload-emoji">{{ em }}</span>
-                                    <button class="decode-button" @click="removeTokenadePayloadAt(idx)" title="Remove">✖</button>
-                                </div>
-                                <button class="decode-button" @click="clearTokenadePayload" title="Clear all">Clear</button>
-                            </div>
+                            <label v-if="tbSingleCarrier" title="Advanced: use this symbol or string as the embedded payload for encoding">
+                                Advanced: custom carrier text
+                                <input type="text" v-model="tbCarrierManual" placeholder="e.g., ⚙️ or ::tag::" />
+                                <small>When set, this overrides quick picks and dropdown.</small>
+                            </label>
                         </div>
                         <div class="token-bomb-actions">
                             <button class="transform-button" @click="generateTokenBomb" title="Build the tokenade with current settings">
