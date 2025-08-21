@@ -1284,7 +1284,8 @@ button:hover {
 }
 
 .transform-category-randomizer .transform-preview {
-    color: rgba(156, 39, 176, 0.9);
+    color: #e1baff;
+    text-shadow: 0 0 8px rgba(225,186,255,.35);
 }
 
 .transform-button:hover .transform-preview {
@@ -1813,7 +1814,7 @@ button:hover {
     position: relative;
     overflow: hidden;
     border: 2px solid rgba(200, 170, 255, 0.35) !important;
-    padding: 16px 22px !important;
+    padding: 18px 28px !important;
     letter-spacing: .3px;
 }
 
