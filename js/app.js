@@ -145,8 +145,9 @@ window.app = new Vue({
                     const emojiGridContainer = document.getElementById('emoji-grid-container');
                     if (emojiGridContainer) {
                         console.log('Found emoji grid container after tab switch');
-                        // Make sure the container is visible
-                        emojiGridContainer.setAttribute('style', 'display: block !important; visibility: visible !important; min-height: 300px; padding: 10px;');
+                        // Only set local sizing, do not force global display states
+                        emojiGridContainer.style.minHeight = '300px';
+                        emojiGridContainer.style.padding = '10px';
                         // Render the emoji grid
                         this.renderEmojiGrid();
                     } else {
@@ -1633,13 +1634,13 @@ window.app = new Vue({
                 return;
             }
             
-            // Force container to be completely visible
-            container.style.cssText = 'display: block !important; visibility: visible !important; min-height: 300px;';
+            // Ensure container sizing only; do not force global display state
+            container.style.minHeight = '300px';
             
             // Make sure parent containers are visible too
             const emojiLibrary = document.querySelector('.emoji-library');
             if (emojiLibrary) {
-                emojiLibrary.style.cssText = 'display: block !important; visibility: visible !important;';
+                // No-op: keep default visibility controlled by Vue
             }
             
             // Clear any existing content to avoid duplication
