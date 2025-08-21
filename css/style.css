@@ -1,5 +1,5 @@
 .danger-modal-backdrop { position: fixed !important; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,.6); z-index: 10000; display:none; align-items:center; justify-content:center; }
-.danger-active .danger-modal-backdrop { display:flex; }
+.danger-modal-backdrop.danger-active { display:flex; }
 .danger-modal { width: 560px; max-width: calc(100% - 32px); background: #0b0f0b; border: 1px solid #2e7d32; border-radius: 10px; box-shadow: 0 18px 48px rgba(0,0,0,.6); transform: scale(.96); animation: danger-pop .18s ease-out forwards; }
 @keyframes danger-pop { to { transform: scale(1); } }
 .danger-header { display:flex; align-items:center; gap:8px; padding: 14px 16px; color:#69f0ae; border-bottom:1px solid #1b5e20; font-size:1.05rem; }
