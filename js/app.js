@@ -19,7 +19,7 @@ window.app = new Vue({
             visual: ['Rainbow Text', 'Strikethrough', 'Underline', 'Reverse Text', 'Alternating Case', 'Reverse Words', 'Random Case', 'Swap Case', 'Title Case', 'Sentence Case', 'Emoji Speak'],
             format: ['Pig Latin', 'Leetspeak', 'Ubbi Dubbi', 'Rövarspråket', 'NATO Phonetic', 'camelCase', 'snake_case', 'kebab-case', 'Squash Whitespace'],
             unicode: ['Invisible Text', 'Upside Down', 'Full Width', 'Small Caps', 'Bubble', 'Braille', 'Greek Letters', 'Wingdings', 'Superscript', 'Subscript', 'Regional Indicator Letters', 'Fraktur', 'Cyrillic Stylized', 'Katakana', 'Hiragana', 'Roman Numerals'],
-            special: ['Medieval', 'Cursive', 'Monospace', 'Double-Struck', 'Elder Futhark', 'Mirror Text', 'Zalgo', 'Unicode Normalize (NFC)', 'Unicode Normalize (NFD)', 'Strip Diacritics', 'Unicode Escape (\u)'],
+            special: ['Medieval', 'Cursive', 'Monospace', 'Double-Struck', 'Elder Futhark', 'Mirror Text', 'Zalgo', 'Unicode Normalize (NFC)', 'Unicode Normalize (NFD)', 'Strip Diacritics', 'Unicode Escape (\\u)'],
             fantasy: ['Quenya (Tolkien Elvish)', 'Tengwar Script', 'Klingon', 'Aurebesh (Star Wars)', 'Dovahzul (Dragon)'],
             ancient: ['Hieroglyphics', 'Ogham (Celtic)', 'Semaphore Flags'],
             technical: ['Brainfuck', 'Mathematical Notation', 'Chemical Symbols'],
