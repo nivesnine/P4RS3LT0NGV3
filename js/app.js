@@ -1778,7 +1778,17 @@ window.app = new Vue({
         },
         copyAllFuzz() { this.copyToClipboard(this.fuzzerOutputs.join('\n')); },
         downloadFuzz() {
-            const blob = new Blob([this.fuzzerOutputs.join('\n')], { type: 'text/plain;charset=utf-8' });
+            const lines = this.fuzzerOutputs.map((s, i) => `#${i+1}\t${s}`).join('\n');
+            const header = `# Parseltongue Fuzzer Output\n# count=${this.fuzzerOutputs.length}\n# seed=${this.fuzzerSeed || ''}\n# strategies=${[
+                this.fuzzUseRandomMix?'randomMix':null,
+                this.fuzzZeroWidth?'zeroWidth':null,
+                this.fuzzUnicodeNoise?'unicodeNoise':null,
+                this.fuzzWhitespace?'whitespace':null,
+                this.fuzzCasing?'casing':null,
+                this.fuzzZalgo?'zalgo':null,
+                this.fuzzEncodeShuffle?'encodeShuffle':null
+            ].filter(Boolean).join(',')}\n`;
+            const blob = new Blob([header + lines + '\n'], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = 'fuzz_cases.txt'; a.click();
             setTimeout(()=>URL.revokeObjectURL(url), 200);

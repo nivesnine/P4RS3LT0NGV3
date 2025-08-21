@@ -250,6 +250,8 @@ h1, h2, h3, h4, h5 {
 .output-container {
     position: relative;
 }
+.fuzzer-list .token-chip { position: relative; }
+.fuzzer-list .token-chip .copy-button { position: static; }
 
 .section-header {
     margin-bottom: 15px;
