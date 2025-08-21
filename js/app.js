@@ -14,15 +14,15 @@ window.app = new Vue({
         activeTransform: null,
         // Transform categories for styling
         transformCategories: {
-            encoding: ['Base64', 'Base64 URL', 'Base32', 'Base45', 'Base58', 'Base62', 'Base85 (Z85)', 'Base91', 'Binary', 'Hexadecimal', 'ASCII85', 'URL Encode', 'HTML Entities', 'Quoted-Printable'],
+            encoding: ['Base64', 'Base64 URL', 'Base32', 'Base32 Crockford', 'Base45', 'Base58', 'Base62', 'Base85 (Z85)', 'Base91', 'Binary', 'Hexadecimal', 'Hex (Compact Uppercase)', 'ASCII85', 'URL Encode', 'HTML Entities', 'Quoted-Printable', 'Bitflip (NOT)+Base64'],
             cipher: ['Caesar Cipher', 'ROT13', 'ROT47', 'Morse Code', 'Atbash Cipher', 'ROT5', 'Vigenère Cipher', 'Rail Fence (3 Rails)', 'Rail Fence (5 Rails)', 'XOR Cipher (KEY)'],
             visual: ['Rainbow Text', 'Strikethrough', 'Underline', 'Reverse Text', 'Alternating Case', 'Reverse Words', 'Random Case', 'Swap Case', 'Title Case', 'Sentence Case', 'Emoji Speak'],
-            format: ['Pig Latin', 'Leetspeak', 'Ubbi Dubbi', 'Rövarspråket', 'NATO Phonetic', 'camelCase', 'snake_case', 'kebab-case', 'Squash Whitespace'],
+            format: ['Pig Latin', 'Ubbi Dubbi', 'Rövarspråket', 'NATO Phonetic', 'camelCase', 'snake_case', 'kebab-case', 'Squash Whitespace'],
             unicode: ['Invisible Text', 'Upside Down', 'Full Width', 'Small Caps', 'Bubble', 'Braille', 'Greek Letters', 'Wingdings', 'Superscript', 'Subscript', 'Regional Indicator Letters', 'Fraktur', 'Cyrillic Stylized', 'Katakana', 'Hiragana', 'Roman Numerals'],
-            special: ['Medieval', 'Cursive', 'Monospace', 'Double-Struck', 'Elder Futhark', 'Mirror Text', 'Zalgo', 'Unicode Normalize (NFC)', 'Unicode Normalize (NFD)', 'Strip Diacritics', 'Unicode Escape (\\u)'],
+            special: ['Medieval', 'Cursive', 'Monospace', 'Double-Struck', 'Elder Futhark', 'Mirror Text', 'Zalgo', 'Unicode Normalize (NFC)', 'Unicode Normalize (NFD)', 'Strip Diacritics', 'Unicode Escape (\u)'],
             fantasy: ['Quenya (Tolkien Elvish)', 'Tengwar Script', 'Klingon', 'Aurebesh (Star Wars)', 'Dovahzul (Dragon)'],
             ancient: ['Hieroglyphics', 'Ogham (Celtic)', 'Semaphore Flags'],
-            technical: ['Brainfuck', 'Mathematical Notation', 'Chemical Symbols'],
+            technical: ['Brainfuck', 'Mathematical Notation', 'Chemical Symbols', 'QWERTY Right Shift', 'QWERTY Left Shift', 'QWERTY ↔ Dvorak'],
             randomizer: ['Random Mix']
         },
         transforms: Object.entries(window.transforms).map(([key, transform]) => ({
@@ -145,9 +145,8 @@ window.app = new Vue({
                     const emojiGridContainer = document.getElementById('emoji-grid-container');
                     if (emojiGridContainer) {
                         console.log('Found emoji grid container after tab switch');
-                        // Only set local sizing, do not force global display states
-                        emojiGridContainer.style.minHeight = '300px';
-                        emojiGridContainer.style.padding = '10px';
+                        // Make sure the container is visible
+                        emojiGridContainer.setAttribute('style', 'display: block !important; visibility: visible !important; min-height: 300px; padding: 10px;');
                         // Render the emoji grid
                         this.renderEmojiGrid();
                     } else {
@@ -1634,13 +1633,13 @@ window.app = new Vue({
                 return;
             }
             
-            // Ensure container sizing only; do not force global display state
-            container.style.minHeight = '300px';
+            // Force container to be completely visible
+            container.style.cssText = 'display: block !important; visibility: visible !important; min-height: 300px;';
             
             // Make sure parent containers are visible too
             const emojiLibrary = document.querySelector('.emoji-library');
             if (emojiLibrary) {
-                // No-op: keep default visibility controlled by Vue
+                emojiLibrary.style.cssText = 'display: block !important; visibility: visible !important;';
             }
             
             // Clear any existing content to avoid duplication
