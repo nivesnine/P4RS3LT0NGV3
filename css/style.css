@@ -2024,10 +2024,11 @@ html {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     margin: 8px 0 12px 0;
 }
-.tokenade-presets .transform-button { min-width: 160px; }
+.tokenade-presets .transform-button { flex: 0 0 auto; min-width: 160px; }
 
 /* Quick picks panel */
 .carrier-quick-grid { 

@@ -1809,19 +1809,19 @@ window.app = new Vue({
 
         applyTokenadePreset(preset) {
             if (preset === 'feather') {
-                this.tbDepth = 1; this.tbBreadth = 3; this.tbRepeats = 2; this.tbSeparator = 'zwsp';
+                this.tbDepth = 1; this.tbBreadth = 3; this.tbRepeats = 2; this.tbSeparator = 'zwnj';
                 this.tbIncludeVS = false; this.tbIncludeNoise = false; this.tbRandomizeEmojis = true;
             } else if (preset === 'light') {
-                this.tbDepth = 2; this.tbBreadth = 3; this.tbRepeats = 3; this.tbSeparator = 'zwsp';
+                this.tbDepth = 2; this.tbBreadth = 3; this.tbRepeats = 3; this.tbSeparator = 'zwnj';
                 this.tbIncludeVS = false; this.tbIncludeNoise = true; this.tbRandomizeEmojis = true;
             } else if (preset === 'middle') {
-                this.tbDepth = 3; this.tbBreadth = 4; this.tbRepeats = 6; this.tbSeparator = 'zwj';
+                this.tbDepth = 3; this.tbBreadth = 4; this.tbRepeats = 6; this.tbSeparator = 'zwnj';
                 this.tbIncludeVS = true; this.tbIncludeNoise = true; this.tbRandomizeEmojis = true;
             } else if (preset === 'heavy') {
-                this.tbDepth = 4; this.tbBreadth = 6; this.tbRepeats = 12; this.tbSeparator = 'zwj';
+                this.tbDepth = 4; this.tbBreadth = 6; this.tbRepeats = 12; this.tbSeparator = 'zwnj';
                 this.tbIncludeVS = true; this.tbIncludeNoise = true; this.tbRandomizeEmojis = true;
             } else if (preset === 'super') {
-                this.tbDepth = 5; this.tbBreadth = 8; this.tbRepeats = 18; this.tbSeparator = 'zwj';
+                this.tbDepth = 5; this.tbBreadth = 8; this.tbRepeats = 18; this.tbSeparator = 'zwnj';
                 this.tbIncludeVS = true; this.tbIncludeNoise = true; this.tbRandomizeEmojis = true;
             }
             this.showNotification('<i class="fas fa-sliders-h"></i> Preset applied', 'success');
