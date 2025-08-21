@@ -90,8 +90,7 @@ window.app = new Vue({
 
         // Danger zone controls
         showDangerModal: false,
-        dangerThresholdTokens: 25_000_000,
-        _pendingTokenadeAction: null
+        dangerThresholdTokens: 25_000_000
     },
     methods: {
         toggleUnicodePanel() {
@@ -1715,19 +1714,14 @@ window.app = new Vue({
         checkTokenadeDangerThenGenerate() {
             const estTokens = this.estimateTokenadeTokens();
             if (estTokens > this.dangerThresholdTokens) {
-                this._pendingTokenadeAction = 'generate';
                 this.showDangerModal = true;
                 return;
             }
             this.generateTokenBomb();
         },
 
-        // Proceed/cancel handlers for modal
-        proceedDangerAction() {
-            const action = this._pendingTokenadeAction; this._pendingTokenadeAction = null; this.showDangerModal = false;
-            if (action === 'generate') this.generateTokenBomb();
-        },
-        cancelDangerAction() { this._pendingTokenadeAction = null; this.showDangerModal = false; },
+        // Modal acknowledge handler
+        proceedDangerAction() { this.showDangerModal = false; },
 
         // Token Bomb Generator Logic
         generateTokenBomb() {
