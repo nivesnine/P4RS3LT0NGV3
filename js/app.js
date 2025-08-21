@@ -1700,8 +1700,8 @@ window.app = new Vue({
         // Token Bomb Generator Logic
         generateTokenBomb() {
             const depth = Math.max(1, Math.min(8, Number(this.tbDepth) || 1));
-            const breadth = Math.max(1, Math.min(12, Number(this.tbBreadth) || 1));
-            const repeats = Math.max(1, Math.min(100, Number(this.tbRepeats) || 1));
+            const breadth = Math.max(1, Math.min(10, Number(this.tbBreadth) || 1));
+            const repeats = Math.max(1, Math.min(50, Number(this.tbRepeats) || 1));
             const sep = this.tbSeparator === 'zwj' ? '\u200D' : this.tbSeparator === 'zwnj' ? '\u200C' : this.tbSeparator === 'zwsp' ? '\u200B' : '';
             const includeVS = !!this.tbIncludeVS;
             const includeNoise = !!this.tbIncludeNoise;
@@ -1830,8 +1830,8 @@ window.app = new Vue({
         // Live estimator for pre-generation length
         estimateTokenadeLength() {
             const depth = Math.max(1, Math.min(8, Number(this.tbDepth) || 1));
-            const breadth = Math.max(1, Math.min(12, Number(this.tbBreadth) || 1));
-            const repeats = Math.max(1, Math.min(100, Number(this.tbRepeats) || 1));
+            const breadth = Math.max(1, Math.min(10, Number(this.tbBreadth) || 1));
+            const repeats = Math.max(1, Math.min(50, Number(this.tbRepeats) || 1));
             const sepLen = this.tbSeparator === 'none' ? 0 : 1;
             const vsPerEmoji = this.tbIncludeVS ? 1 : 0;
             const noiseAvg = this.tbIncludeNoise ? 2 : 0;

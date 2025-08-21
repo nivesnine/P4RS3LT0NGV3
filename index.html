@@ -270,12 +270,12 @@
                             </label>
                             <label class="slider-block" title="How many items per level; higher = wider structure">
                                 Breadth per level
-                                <input class="hacker-slider" type="range" v-model.number="tbBreadth" min="1" max="12" />
+                                <input class="hacker-slider" type="range" v-model.number="tbBreadth" min="1" max="10" />
                                 <span class="slider-value">{{ tbBreadth }}</span>
                             </label>
                             <label class="slider-block" title="How many times to repeat the whole block">
                                 Repeats (blocks)
-                                <input class="hacker-slider" type="range" v-model.number="tbRepeats" min="1" max="100" />
+                                <input class="hacker-slider" type="range" v-model.number="tbRepeats" min="1" max="50" />
                                 <span class="slider-value">{{ tbRepeats }}</span>
                             </label>
                             <div class="segmented" title="Invisible separator inserted between units">
