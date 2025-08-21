@@ -1743,18 +1743,16 @@ window.app = new Vue({
         casingChaos(text, rnd) {
             return [...text].map(c => /[a-z]/i.test(c)? (rnd()<0.5? c.toUpperCase():c.toLowerCase()) : c).join('');
         },
+        // Replace encodeShuffle with homoglyph confusables injection
         encodeShuffle(text, rnd) {
-            const opts = ['base64','base32','hex','base58','base62','url'];
-            const t = this.pick(opts, rnd);
-            const tx = {
-                base64: ()=> window.transforms.base64.func(text),
-                base32: ()=> window.transforms.base32.func(text),
-                hex: ()=> window.transforms.hex.func(text),
-                base58: ()=> window.transforms.base58.func(text),
-                base62: ()=> window.transforms.base62.func(text),
-                url: ()=> window.transforms.url.func(text)
+            const map = {
+                'A':'Α','B':'Β','C':'Ϲ','E':'Ε','H':'Η','I':'Ι','K':'Κ','M':'Μ','N':'Ν','O':'Ο','P':'Ρ','T':'Τ','X':'Χ','Y':'Υ',
+                'a':'а','c':'с','e':'е','i':'і','j':'ј','o':'о','p':'р','s':'ѕ','x':'х','y':'у'
             };
-            return (tx[t]||(()=>text))();
+            return [...text].map(ch => {
+                if (map[ch] && rnd() < 0.25) return map[ch];
+                return ch;
+            }).join('');
         },
         generateFuzzCases() {
             const src = String(this.fuzzerInput || '');

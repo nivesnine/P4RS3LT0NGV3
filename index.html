@@ -79,18 +79,18 @@
                     <i class="fas fa-bomb"></i> Tokenade
                 </button>
                 <button 
+                    :class="{ active: activeTab === 'fuzzer' }" 
+                    @click="switchToTab('fuzzer')"
+                    title="Generate many mutated payloads for testing"
+                >
+                    <i class="fas fa-bug"></i> Mutation Lab
+                </button>
+                <button 
                     :class="{ active: activeTab === 'tokenizer' }" 
                     @click="switchToTab('tokenizer')"
                     title="Tokenizer visualization"
                 >
                     <i class="fas fa-layer-group"></i> Tokenizer
-                </button>
-                <button 
-                    :class="{ active: activeTab === 'fuzzer' }" 
-                    @click="switchToTab('fuzzer')"
-                    title="Generate many mutated payloads for testing"
-                >
-                    <i class="fas fa-bug"></i> Fuzzer
                 </button>
             </div>
 
@@ -397,12 +397,12 @@
                 </div>
             </div>
             
-            <!-- Fuzzer Tab -->
+            <!-- Mutation Lab (Fuzzer) Tab -->
             <div v-if="activeTab === 'fuzzer'" class="tab-content">
                 <div class="transform-layout">
                     <div class="transform-section">
                         <div class="section-header">
-                            <h3><i class="fas fa-bug"></i> Fuzzer <small>mutate text into diverse payloads</small></h3>
+                            <h3><i class="fas fa-bug"></i> Mutation Lab <small>mutate text into diverse payloads</small></h3>
                         </div>
                         <div class="options-grid">
                             <label>
@@ -425,7 +425,7 @@
                             <label class="switch neon"><input type="checkbox" v-model="fuzzZalgo" /><span>Zalgo</span></label>
                             <label class="switch neon"><input type="checkbox" v-model="fuzzWhitespace" /><span>Whitespace chaos</span></label>
                             <label class="switch neon"><input type="checkbox" v-model="fuzzCasing" /><span>Casing chaos</span></label>
-                            <label class="switch neon"><input type="checkbox" v-model="fuzzEncodeShuffle" /><span>Encode shuffle (Base64/URL/Hex)</span></label>
+                            <label class="switch neon"><input type="checkbox" v-model="fuzzEncodeShuffle" /><span>Homoglyph confusables</span></label>
                         </div>
                         <div class="token-bomb-actions">
                             <button class="transform-button" @click="generateFuzzCases"><i class="fas fa-hammer"></i> Generate Cases</button>
