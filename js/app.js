@@ -25,7 +25,8 @@ window.app = new Vue({
             technical: ['Brainfuck', 'Mathematical Notation', 'Chemical Symbols'],
             randomizer: ['Random Mix']
         },
-        transforms: Object.entries(window.transforms).map(([key, transform]) => ({
+        // Be resilient if transforms.js fails to load
+        transforms: Object.entries(window.transforms || {}).map(([key, transform]) => ({
             name: transform.name,
             func: transform.func.bind(transform),
             preview: transform.preview.bind(transform)
