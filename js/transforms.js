@@ -17,10 +17,16 @@ const transforms = {
             if (!text) return '';
             const matches = [...text.matchAll(/[\uE0000-\uE007F]/g)];
             if (!matches.length) return '';
-            
-            return matches
-                .map(match => String.fromCharCode(match[0].codePointAt(0) - 0xE0000))
-                .join('');
+            const bytes = new Uint8Array(matches.length);
+            for (let i=0;i<matches.length;i++) {
+                bytes[i] = matches[i][0].codePointAt(0) - 0xE0000;
+            }
+            try {
+                return new TextDecoder().decode(bytes);
+            } catch (_) {
+                // Fallback: direct char mapping
+                return Array.from(bytes).map(b => String.fromCharCode(b)).join('');
+            }
         }
     },
 
@@ -50,11 +56,7 @@ const transforms = {
         func: function(text) {
             return [...text].map(c => this.map[c] || c).reverse().join('');
         },
-        preview: function(text) {
-            if (!text) return '[binary]';
-            const firstChar = text.charAt(0);
-            return firstChar.charCodeAt(0).toString(2).padStart(8, '0') + '...';
-        },
+        preview: function(text) { return this.func(text || 'abc'); },
         reverse: function(text) {
             const revMap = this.reverseMap();
             return [...text].map(c => revMap[c] || c).reverse().join('');
@@ -79,11 +81,7 @@ const transforms = {
         func: function(text) {
             return [...text.toLowerCase()].map(c => this.map[c] || c).join('');
         },
-        preview: function(text) {
-            if (!text) return '[hex]';
-            const firstChar = text.charAt(0);
-            return firstChar.charCodeAt(0).toString(16).padStart(2, '0') + '...';
-        },
+        preview: function(text) { return this.func(text || 'runes'); },
         reverse: function(text) {
             const revMap = this.reverseMap();
             return [...text].map(c => revMap[c] || c).join('');
