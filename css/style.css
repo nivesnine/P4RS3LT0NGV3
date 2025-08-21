@@ -1818,6 +1818,7 @@ button:hover {
     letter-spacing: .3px;
     min-width: 48ch;
     justify-content: center;
+    text-align: center;
 }
 
 .randomizer-button::after {
@@ -1956,6 +1957,8 @@ button:hover {
 
 .unicode-panel-content { padding: 12px; overflow-y: auto; }
 .unicode-panel-header .close-button { background: transparent; border: none; color: var(--text-color); cursor: pointer; padding: 4px; }
+.apply-status { color:#69f0ae; opacity:.9; }
+.apply-steg-options.applied { border-color:#2e7d32; box-shadow: 0 0 12px rgba(105,240,174,.35) inset, 0 0 16px rgba(105,240,174,.2); }
 
 /* Fluid UX: reduce scroll fatigue during repeated actions */
 html {

@@ -100,6 +100,8 @@ window.app = new Vue({
         maxHistoryItems: 10,
         showCopyHistory: false,
         showUnicodePanel: false,
+        unicodeApplyBusy: false,
+        unicodeApplyFlash: false,
 
         // Danger zone controls
         showDangerModal: false,
@@ -115,6 +117,8 @@ window.app = new Vue({
             }
         },
         applyUnicodeOptions() {
+            if (this.unicodeApplyBusy) return;
+            this.unicodeApplyBusy = true;
             try {
                 const initSel = document.querySelector('.steg-initial-presentation');
                 const vs0Sel = document.querySelector('.steg-vs-zero');
@@ -134,14 +138,16 @@ window.app = new Vue({
                         bitOrder: orderSel && orderSel.value || 'msb',
                         trailingZW: trailSel && trailSel.value || ''
                     });
+                    this.unicodeApplyFlash = true;
                     this.showNotification('<i class="fas fa-sliders-h"></i> Advanced settings applied', 'success');
+                    setTimeout(()=>{ this.unicodeApplyFlash = false; }, 1200);
                 } else {
                     this.showNotification('<i class="fas fa-exclamation-triangle"></i> Engine missing setOptions()', 'warning');
                 }
             } catch (e) {
                 console.error('Apply Unicode options error', e);
                 this.showNotification('<i class="fas fa-exclamation-triangle"></i> Failed to apply settings', 'error');
-            }
+            } finally { this.unicodeApplyBusy = false; }
         },
         // Focus an element without causing the page to scroll
         focusWithoutScroll(el) {

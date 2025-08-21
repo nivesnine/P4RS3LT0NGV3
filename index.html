@@ -745,7 +745,7 @@
                                             :title="'Click to apply random transforms to each word!'"
                                         >
                                             <i class="fas fa-wand-magic-sparkles"></i>
-                                            {{ transform.name }}
+                                            !RANDOMIZE!
                                             <small class="transform-preview">
                                                 🌀 Each word = different transform!
                                             </small>
@@ -920,7 +920,10 @@
                         <option value="">None</option>
                     </select>
                 </label>
-                <button class="apply-steg-options" @click="applyUnicodeOptions">Apply</button>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <button class="apply-steg-options" :class="{ applied: unicodeApplyFlash }" :disabled="unicodeApplyBusy" @click="applyUnicodeOptions">Apply</button>
+                    <small v-if="unicodeApplyFlash" class="apply-status">Applied</small>
+                </div>
                 <small class="steg-note">These options affect Unicode-based steganography encoding/decoding.</small>
             </div>
         </div>
