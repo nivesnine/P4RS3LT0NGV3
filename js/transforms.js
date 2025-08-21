@@ -1308,6 +1308,135 @@ const transforms = {
         }
     },
 
+    // Base85 (Z85 variant)
+    base85_z85: {
+        name: 'Base85 (Z85)',
+        alphabet: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#',
+        func: function(text) {
+            if (!text) return '';
+            const bytes = new TextEncoder().encode(text);
+            if (bytes.length % 4 !== 0) {
+                // Z85 requires length %4==0; pad with zeros and strip later marker
+                const padded = new Uint8Array(bytes.length + (4 - (bytes.length % 4)));
+                padded.set(bytes);
+                return this._encodeZ85(padded).replace(/~+$/,'');
+            }
+            return this._encodeZ85(bytes);
+        },
+        _encodeZ85: function(bytes) {
+            const enc = this.alphabet;
+            let out = '';
+            for (let i = 0; i < bytes.length; i += 4) {
+                const value = (bytes[i] << 24) >>> 0 | (bytes[i+1] << 16) | (bytes[i+2] << 8) | (bytes[i+3]);
+                let div = value >>> 0;
+                const block = new Array(5);
+                for (let j = 4; j >= 0; j--) { block[j] = enc[div % 85]; div = Math.floor(div / 85); }
+                out += block.join('');
+            }
+            return out;
+        },
+        preview: function(text) {
+            return this.func(text || 'hello');
+        },
+        reverse: function(text) {
+            if (!text) return '';
+            const enc = this.alphabet;
+            const map = {};
+            for (let i=0;i<enc.length;i++) map[enc[i]] = i;
+            const str = String(text);
+            if (str.length % 5 !== 0) {
+                // pad with leading of last block to make divisible
+                const pad = 5 - (str.length % 5);
+                // use the first alphabet char as zero padding
+                return this._decodeZ85(str + enc[0].repeat(pad));
+            }
+            return this._decodeZ85(str);
+        },
+        _decodeZ85: function(str) {
+            const enc = this.alphabet;
+            const map = {};
+            for (let i=0;i<enc.length;i++) map[enc[i]] = i;
+            const bytes = [];
+            for (let i = 0; i < str.length; i += 5) {
+                let value = 0;
+                for (let j = 0; j < 5; j++) { value = value * 85 + (map[str[i+j]] || 0); }
+                bytes.push((value >>> 24) & 0xFF, (value >>> 16) & 0xFF, (value >>> 8) & 0xFF, value & 0xFF);
+            }
+            return new TextDecoder().decode(Uint8Array.from(bytes));
+        }
+    },
+
+    // Base91 (Joachim Henke)
+    base91: {
+        name: 'Base91',
+        alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~\"",
+        func: function(text) {
+            if (!text) return '';
+            const enc = this.alphabet;
+            const bytes = new TextEncoder().encode(text);
+            let b = 0, n = 0, out = '';
+            for (let i = 0; i < bytes.length; i++) {
+                b |= bytes[i] << n; n += 8;
+                if (n > 13) {
+                    let v = b & 8191; // 2^13-1
+                    if (v > 88) { b >>= 13; n -= 13; }
+                    else { v = b & 16383; b >>= 14; n -= 14; }
+                    out += enc[v % 91] + enc[Math.floor(v / 91)];
+                }
+            }
+            if (n) out += enc[b % 91] + (n > 7 ? enc[Math.floor(b / 91)] : '');
+            return out;
+        },
+        preview: function(text) { return this.func(text || 'base91'); },
+        reverse: function(text) {
+            if (!text) return '';
+            const enc = this.alphabet;
+            const map = {}; for (let i=0;i<enc.length;i++) map[enc[i]] = i;
+            let b = 0, n = 0, v = -1; const out = [];
+            for (let i = 0; i < text.length; i++) {
+                const c = map[text[i]]; if (c === undefined) continue;
+                if (v < 0) v = c; else {
+                    v += c * 91; b |= v << n; n += (v & 8191) > 88 ? 13 : 14; v = -1;
+                    while (n >= 8) { out.push(b & 255); b >>= 8; n -= 8; }
+                }
+            }
+            if (v > -1) out.push((b | (v << n)) & 255);
+            return new TextDecoder().decode(Uint8Array.from(out));
+        }
+    },
+
+    // Quoted-Printable
+    quoted_printable: {
+        name: 'Quoted-Printable',
+        func: function(text) {
+            if (!text) return '';
+            const bytes = new TextEncoder().encode(text);
+            let out = '';
+            for (let i=0;i<bytes.length;i++) {
+                const b = bytes[i];
+                const ch = String.fromCharCode(b);
+                const isPrintable = (b >= 33 && b <= 126 && ch !== '=');
+                if (isPrintable) out += ch; else out += '=' + b.toString(16).toUpperCase().padStart(2,'0');
+            }
+            // Soft-wrap at 76 chars
+            return out.replace(/.{1,76}/g, (m)=>m + (m.length===76?'=\r\n':'')).replace(/=\r\n$/,'');
+        },
+        preview: function(text) { return this.func(text || 'Café'); },
+        reverse: function(text) {
+            if (!text) return '';
+            const str = text.replace(/=\r?\n/g,'');
+            const bytes = [];
+            for (let i=0;i<str.length;i++) {
+                if (str[i] === '=' && /[0-9A-Fa-f]{2}/.test(str.slice(i+1,i+3))) {
+                    bytes.push(parseInt(str.slice(i+1,i+3),16)); i += 2;
+                } else {
+                    bytes.push(str.charCodeAt(i));
+                }
+            }
+            return new TextDecoder().decode(Uint8Array.from(bytes));
+        }
+    },
+
     // Base45 (RFC 9285, used in QR payloads)
     base45: {
         name: 'Base45',

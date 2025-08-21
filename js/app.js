@@ -14,7 +14,7 @@ window.app = new Vue({
         activeTransform: null,
         // Transform categories for styling
         transformCategories: {
-            encoding: ['Base64', 'Base64 URL', 'Base32', 'Base45', 'Base58', 'Base62', 'Binary', 'Hexadecimal', 'ASCII85', 'URL Encode', 'HTML Entities'],
+            encoding: ['Base64', 'Base64 URL', 'Base32', 'Base45', 'Base58', 'Base62', 'Base85 (Z85)', 'Base91', 'Binary', 'Hexadecimal', 'ASCII85', 'URL Encode', 'HTML Entities', 'Quoted-Printable'],
             cipher: ['Caesar Cipher', 'ROT13', 'ROT47', 'Morse Code', 'Atbash Cipher', 'ROT5', 'Vigenère Cipher', 'Rail Fence (3 Rails)', 'Rail Fence (5 Rails)', 'XOR Cipher (KEY)'],
             visual: ['Rainbow Text', 'Strikethrough', 'Underline', 'Reverse Text', 'Alternating Case', 'Reverse Words', 'Random Case', 'Swap Case', 'Title Case', 'Sentence Case', 'Emoji Speak'],
             format: ['Pig Latin', 'Leetspeak', 'Ubbi Dubbi', 'Rövarspråket', 'NATO Phonetic', 'camelCase', 'snake_case', 'kebab-case', 'Squash Whitespace'],
