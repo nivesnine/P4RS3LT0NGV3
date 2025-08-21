@@ -212,28 +212,23 @@ const transforms = {
     binary: {
         name: 'Binary',
         func: function(text) {
-            return [...text].map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
+            const bytes = new TextEncoder().encode(text || '');
+            return Array.from(bytes).map(b => b.toString(2).padStart(8,'0')).join(' ');
         },
         preview: function(text) {
-            if (!text) return '[binary]';
-            const firstChar = text.charAt(0);
-            return firstChar.charCodeAt(0).toString(2).padStart(8, '0') + '...';
+            return this.func(text || 'abc');
         },
         reverse: function(text) {
-            // Remove spaces and ensure we have valid binary
-            const binText = text.replace(/\s+/g, '');
-            let result = '';
-            
-            // Process 8 bits at a time
-            for (let i = 0; i < binText.length; i += 8) {
-                const byte = binText.substr(i, 8);
-                if (byte.length === 8) {
-                    result += String.fromCharCode(parseInt(byte, 2));
-                }
+            const binText = (text || '').replace(/\s+/g, '');
+            const bytes = [];
+            for (let i=0;i<binText.length;i+=8) {
+                const byte = binText.substr(i,8);
+                if (byte.length===8) bytes.push(parseInt(byte,2));
             }
-            return result;
+            return new TextDecoder().decode(Uint8Array.from(bytes));
         }
-    }
+    },
+
     // Note: other transforms don't have reverse functions because they're not easily reversible
     // The universal decoder will only try to reverse transforms that have a reverse function
     ,
@@ -242,7 +237,11 @@ const transforms = {
     base64: {
         name: 'Base64',
         func: function(text) {
-            return btoa(text);
+            if (!text) return '';
+            const bytes = new TextEncoder().encode(text);
+            let bin = '';
+            for (let i=0;i<bytes.length;i++) bin += String.fromCharCode(bytes[i]);
+            return btoa(bin);
         },
         preview: function(text) {
             if (!text) return '[base64]';
@@ -250,7 +249,11 @@ const transforms = {
         },
         reverse: function(text) {
             try {
-                return atob(text);
+                if (!text) return '';
+                const bin = atob(text);
+                const bytes = new Uint8Array(bin.length);
+                for (let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+                return new TextDecoder().decode(bytes);
             } catch (e) {
                 return text;
             }
@@ -261,7 +264,10 @@ const transforms = {
         name: 'Base64 URL',
         func: function(text) {
             if (!text) return '';
-            const std = btoa(text);
+            const bytes = new TextEncoder().encode(text);
+            let bin = '';
+            for (let i=0;i<bytes.length;i++) bin += String.fromCharCode(bytes[i]);
+            const std = btoa(bin);
             return std.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/,'');
         },
         preview: function(text) {
@@ -271,9 +277,13 @@ const transforms = {
         reverse: function(text) {
             if (!text) return '';
             let std = text.replace(/-/g, '+').replace(/_/g, '/');
-            // pad
             while (std.length % 4 !== 0) std += '=';
-            try { return atob(std); } catch (e) { return text; }
+            try { 
+                const bin = atob(std);
+                const bytes = new Uint8Array(bin.length);
+                for (let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+                return new TextDecoder().decode(bytes);
+            } catch (e) { return text; }
         }
     },
     
