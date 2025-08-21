@@ -71,6 +71,13 @@
                 >
                     <i class="fas fa-smile"></i> Emoji
                 </button>
+                <button 
+                    :class="{ active: activeTab === 'tokenade' }" 
+                    @click="switchToTab('tokenade')"
+                    title="Tokenade Generator"
+                >
+                    <i class="fas fa-bomb"></i> Tokenade
+                </button>
             </div>
 
             <!-- Steganography Tab -->
@@ -113,116 +120,7 @@
                         </div>
                     </div>
 
-                    <!-- Tokenade Generator -->
-                    <div class="token-bomb-section">
-                        <div class="section-header">
-                            <h3>
-                                <span title="High-density token payload builder">💥 Tokenade Generator</span>
-                                <small>Craft dense token sequences with nested emojis and zero-width characters</small>
-                            </h3>
-                        </div>
-                        <div class="output-instructions">
-                            <small>
-                                <strong>Disclaimer:</strong> These payloads can be disruptive to models, UIs, and tools. Use responsibly and avoid deploying in production or against systems without consent.
-                            </small>
-                        </div>
-                        <div class="tokenade-presets">
-                            <label style="margin-right:8px">Presets</label>
-                            <button class="transform-button" title="Very light density" @click="applyTokenadePreset('feather')">🪶 Featherweight</button>
-                            <button class="transform-button" title="Light density" @click="applyTokenadePreset('light')">🍃 Lightweight</button>
-                            <button class="transform-button" title="Balanced density" @click="applyTokenadePreset('middle')">🪨 Middleweight</button>
-                            <button class="transform-button" title="High density" @click="applyTokenadePreset('heavy')">🗿 Heavyweight</button>
-                            <button class="transform-button" title="Extreme density (use with care)" @click="applyTokenadePreset('super')">⚓ Super Heavyweight</button>
-                        </div>
-                        <div class="token-bomb-controls options-grid">
-                            <label title="Nesting levels; higher = more layers of grouping">
-                                Depth (nesting)
-                                <input type="number" v-model.number="tbDepth" min="1" max="8" />
-                            </label>
-                            <label title="How many items per level; higher = wider structure">
-                                Breadth per level
-                                <input type="number" v-model.number="tbBreadth" min="1" max="12" />
-                            </label>
-                            <label title="How many times to repeat the whole block">
-                                Repeats (blocks)
-                                <input type="number" v-model.number="tbRepeats" min="1" max="100" />
-                            </label>
-                            <label title="Invisible separator inserted between units">
-                                Separator
-                                <select v-model="tbSeparator">
-                                    <option value="zwj">Zero-Width Joiner (\u200D)</option>
-                                    <option value="zwnj">Zero-Width Non-Joiner (\u200C)</option>
-                                    <option value="zwsp">Zero-Width Space (\u200B)</option>
-                                    <option value="none">None</option>
-                                </select>
-                            </label>
-                            <label title="Adds VS16/VS15 after glyphs to increase token churn">
-                                Include Variation Selectors
-                                <input type="checkbox" v-model="tbIncludeVS" />
-                            </label>
-                            <label title="Sprinkles random zero-width codepoints between segments">
-                                Include Invisible Noise
-                                <input type="checkbox" v-model="tbIncludeNoise" />
-                            </label>
-                            <label title="Use random emojis instead of cycling a fixed set">
-                                Randomize Emojis
-                                <input type="checkbox" v-model="tbRandomizeEmojis" />
-                            </label>
-                            <label title="Automatically copy result after generation">
-                                Auto-copy
-                                <input type="checkbox" v-model="tbAutoCopy" />
-                            </label>
-                        </div>
-                        <!-- Live estimate before generation -->
-                        <div class="output-instructions">
-                            <small>
-                                Estimated length: {{ estimateTokenadeLength().toLocaleString() }} chars
-                            </small>
-                        </div>
-                        <!-- Single carrier embedding mode -->
-                        <div class="tokenade-carrier-options options-grid">
-                            <label title="Condense payload into a single emoji carrier">
-                                Single carrier mode
-                                <input type="checkbox" v-model="tbSingleCarrier" />
-                            </label>
-                            <label v-if="tbSingleCarrier" title="Pick the carrier emoji">
-                                Carrier
-                                <input type="text" v-model="tbCarrier" placeholder="Drop or type an emoji" @focus="setCarrierFromSelected" />
-                            </label>
-                        </div>
-                        <div v-if="tbSingleCarrier" class="tokenade-payload-drop">
-                            <div class="drop-zone" 
-                                 @dragover.prevent 
-                                 @drop="handleTokenadeDrop"
-                                 @paste="handleTokenadePaste"
-                                 title="Drag/Drop or paste emojis here to embed into the carrier">
-                                Drop or paste emojis to embed →
-                            </div>
-                            <div class="payload-list" v-if="tbPayloadEmojis.length">
-                                <div class="payload-item" v-for="(em, idx) in tbPayloadEmojis" :key="idx">
-                                    <span class="payload-emoji">{{ em }}</span>
-                                    <button class="decode-button" @click="removeTokenadePayloadAt(idx)" title="Remove">✖</button>
-                                </div>
-                                <button class="decode-button" @click="clearTokenadePayload" title="Clear all">Clear</button>
-                            </div>
-                        </div>
-                        <div class="token-bomb-actions">
-                            <button class="transform-button" @click="generateTokenBomb" title="Build the tokenade with current settings">
-                                <i class="fas fa-hammer"></i> Generate Tokenade
-                            </button>
-                            <button class="copy-button" v-if="tokenBombOutput" @click="copyToClipboard(tokenBombOutput)">
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                            <div class="output-instructions" v-if="tokenBombOutput">
-                                <small>
-                                    Length: {{ tokenBombOutput.length.toLocaleString() }} chars · Tip: Increasing depth/breadth grows size <em>multiplicatively</em>.
-                                </small>
-                            </div>
-                        </div>
-                        <div class="output-container" v-if="tokenBombOutput">
-                            <textarea readonly v-model="tokenBombOutput" aria-label="Token bomb output"></textarea>
-                        </div>
-                    </div>
+
 
                     <div class="output-section" v-if="encodedMessage">
                         <div class="output-heading">
@@ -707,6 +605,152 @@
         </div>
     </div>
 
+    <!-- Tokenade Tab -->
+    <div v-if="activeTab === 'tokenade'" class="tab-content">
+        <div class="transform-layout">
+            <div class="token-bomb-section">
+                <div class="section-header">
+                    <h3>
+                        <span title="High-density token payload builder">💥 Tokenade Generator</span>
+                        <small>Craft dense token sequences with emojis and zero-width characters</small>
+                    </h3>
+                </div>
+                <div class="output-instructions">
+                    <small>
+                        <strong>Disclaimer:</strong> These payloads can be disruptive to models, UIs, and tools. Use responsibly and avoid deploying in production or against systems without consent.
+                    </small>
+                </div>
+                <div class="tokenade-presets">
+                    <label style="margin-right:8px">Presets</label>
+                    <button class="transform-button" title="Very light density" @click="applyTokenadePreset('feather')">🪶 Featherweight</button>
+                    <button class="transform-button" title="Light density" @click="applyTokenadePreset('light')">🍃 Lightweight</button>
+                    <button class="transform-button" title="Balanced density" @click="applyTokenadePreset('middle')">🪨 Middleweight</button>
+                    <button class="transform-button" title="High density" @click="applyTokenadePreset('heavy')">🗿 Heavyweight</button>
+                    <button class="transform-button" title="Extreme density (use with care)" @click="applyTokenadePreset('super')">⚓ Super Heavyweight</button>
+                </div>
+                <div class="token-bomb-controls options-grid">
+                    <label title="Nesting levels; higher = more layers of grouping">
+                        Depth (nesting)
+                        <input type="number" v-model.number="tbDepth" min="1" max="8" />
+                    </label>
+                    <label title="How many items per level; higher = wider structure">
+                        Breadth per level
+                        <input type="number" v-model.number="tbBreadth" min="1" max="12" />
+                    </label>
+                    <label title="How many times to repeat the whole block">
+                        Repeats (blocks)
+                        <input type="number" v-model.number="tbRepeats" min="1" max="100" />
+                    </label>
+                    <label title="Invisible separator inserted between units">
+                        Separator
+                        <select v-model="tbSeparator">
+                            <option value="zwj">Zero-Width Joiner (\u200D)</option>
+                            <option value="zwnj">Zero-Width Non-Joiner (\u200C)</option>
+                            <option value="zwsp">Zero-Width Space (\u200B)</option>
+                            <option value="none">None</option>
+                        </select>
+                    </label>
+                    <label title="Adds VS16/VS15 after glyphs to increase token churn">
+                        Include Variation Selectors
+                        <input type="checkbox" v-model="tbIncludeVS" />
+                    </label>
+                    <label title="Sprinkles random zero-width codepoints between segments">
+                        Include Invisible Noise
+                        <input type="checkbox" v-model="tbIncludeNoise" />
+                    </label>
+                    <label title="Use random emojis instead of cycling a fixed set">
+                        Randomize Emojis
+                        <input type="checkbox" v-model="tbRandomizeEmojis" />
+                    </label>
+                    <label title="Automatically copy result after generation">
+                        Auto-copy
+                        <input type="checkbox" v-model="tbAutoCopy" />
+                    </label>
+                </div>
+                <div class="output-instructions">
+                    <small>
+                        Estimated length: {{ estimateTokenadeLength().toLocaleString() }} chars
+                    </small>
+                </div>
+                <div class="tokenade-carrier-options options-grid">
+                    <label title="Condense payload into a single emoji carrier">
+                        Single carrier mode
+                        <input type="checkbox" v-model="tbSingleCarrier" />
+                    </label>
+                    <label v-if="tbSingleCarrier" title="Pick the carrier emoji">
+                        Carrier
+                        <input type="text" v-model="tbCarrier" placeholder="Drop or type an emoji" @focus="setCarrierFromSelected" />
+                    </label>
+                </div>
+                <div v-if="tbSingleCarrier" class="tokenade-payload-drop">
+                    <div class="drop-zone" 
+                         @dragover.prevent 
+                         @drop="handleTokenadeDrop"
+                         @paste="handleTokenadePaste"
+                         title="Drag/Drop or paste emojis here to embed into the carrier">
+                        Drop or paste emojis to embed →
+                    </div>
+                    <div class="payload-list" v-if="tbPayloadEmojis.length">
+                        <div class="payload-item" v-for="(em, idx) in tbPayloadEmojis" :key="idx">
+                            <span class="payload-emoji">{{ em }}</span>
+                            <button class="decode-button" @click="removeTokenadePayloadAt(idx)" title="Remove">✖</button>
+                        </div>
+                        <button class="decode-button" @click="clearTokenadePayload" title="Clear all">Clear</button>
+                    </div>
+                </div>
+                <div class="token-bomb-actions">
+                    <button class="transform-button" @click="generateTokenBomb" title="Build the tokenade with current settings">
+                        <i class="fas fa-hammer"></i> Generate Tokenade
+                    </button>
+                    <button class="copy-button" v-if="tokenBombOutput" @click="copyToClipboard(tokenBombOutput)">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <div class="output-instructions" v-if="tokenBombOutput">
+                        <small>
+                            Length: {{ tokenBombOutput.length.toLocaleString() }} chars · Tip: Increasing depth/breadth grows size <em>multiplicatively</em>.
+                        </small>
+                    </div>
+                </div>
+                <div class="output-container" v-if="tokenBombOutput">
+                    <textarea readonly v-model="tokenBombOutput" aria-label="Token bomb output"></textarea>
+                </div>
+            </div>
+
+            <!-- Text Payload Generator (simple) -->
+            <div class="transform-section">
+                <h4><i class="fas fa-font"></i> Text Payload Generator</h4>
+                <div class="options-grid">
+                    <label>
+                        Base text
+                        <input type="text" v-model="tpBase" placeholder="Enter base snippet (e.g., hello)" />
+                    </label>
+                    <label>
+                        Repeat count
+                        <input type="number" v-model.number="tpRepeat" min="1" max="1000" />
+                    </label>
+                    <label>
+                        Add combining marks
+                        <input type="checkbox" v-model="tpCombining" />
+                    </label>
+                    <label>
+                        Add zero-width spacing
+                        <input type="checkbox" v-model="tpZW" />
+                    </label>
+                </div>
+                <div class="token-bomb-actions">
+                    <button class="transform-button" @click="generateTextPayload">
+                        <i class="fas fa-hammer"></i> Generate Text Payload
+                    </button>
+                    <button class="copy-button" v-if="textPayload" @click="copyToClipboard(textPayload)">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                <div class="output-container" v-if="textPayload">
+                    <textarea readonly v-model="textPayload" aria-label="Text payload output"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Global Advanced Unicode / Steg Options Panel -->
     <div id="unicode-options-panel" class="unicode-options-panel">
         <div class="unicode-panel-header">

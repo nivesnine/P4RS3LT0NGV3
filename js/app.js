@@ -65,6 +65,12 @@ window.app = new Vue({
         tbCarrier: '',
         tbPayloadEmojis: [],
         tokenBombOutput: '',
+        // Text Payload Generator
+        tpBase: '',
+        tpRepeat: 100,
+        tpCombining: true,
+        tpZW: false,
+        textPayload: '',
         
         // History of copied content
         copyHistory: [],
@@ -1864,6 +1870,30 @@ window.app = new Vue({
             const parts = window.emojiLibrary.splitEmojis(text);
             const onlyEmojis = parts.filter(p => /\p{Extended_Pictographic}/u.test(p));
             this.tbPayloadEmojis.push(...onlyEmojis);
+        }
+        ,
+        generateTextPayload() {
+            const base = String(this.tpBase || 'A');
+            const count = Math.max(1, Math.min(10000, Number(this.tpRepeat) || 1));
+            const combining = this.tpCombining;
+            const addZW = this.tpZW;
+            const marks = ['\u0301','\u0300','\u0302','\u0303','\u0308','\u0307','\u0304'];
+            const zw = ['\u200B','\u200C','\u200D','\u2060'];
+            let out = '';
+            for (let i=0;i<count;i++) {
+                let token = base;
+                if (combining) {
+                    const m = marks[i % marks.length];
+                    token += m;
+                }
+                if (addZW) {
+                    const z = zw[i % zw.length];
+                    token += z;
+                }
+                out += token;
+            }
+            this.textPayload = out;
+            this.showNotification('<i class="fas fa-bomb"></i> Text payload generated', 'success');
         }
     },
     // Initialize theme and components
