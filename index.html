@@ -427,7 +427,7 @@
                             <label class="switch neon"><input type="checkbox" v-model="fuzzCasing" /><span>Casing chaos</span></label>
                             <label class="switch neon"><input type="checkbox" v-model="fuzzEncodeShuffle" /><span>Homoglyph confusables</span></label>
                         </div>
-                        <div class="token-bomb-actions">
+                        <div class="token-bomb-actions mutation-actions">
                             <button class="transform-button" @click="generateFuzzCases"><i class="fas fa-hammer"></i> Generate Cases</button>
                             <button class="action-button" v-if="fuzzerOutputs.length" @click="copyAllFuzz"><i class="fas fa-copy"></i> Copy All</button>
                             <button class="action-button" v-if="fuzzerOutputs.length" @click="downloadFuzz"><i class="fas fa-download"></i> Download</button>

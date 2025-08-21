@@ -2128,3 +2128,8 @@ html {
     border: 1px solid var(--input-border);
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
+
+/* Mutation Lab actions */
+.mutation-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.mutation-actions .action-button, .mutation-actions .transform-button { white-space: nowrap; }
+.mutation-actions .action-button i, .mutation-actions .transform-button i { margin-right: 6px; }
