@@ -250,10 +250,9 @@
                                 <small>Craft dense token sequences with emojis and zero-width characters</small>
                             </h3>
                         </div>
-                        <div class="output-instructions">
-                            <small>
-                                <strong>Disclaimer:</strong> These payloads can be disruptive to models, UIs, and tools. Use responsibly and avoid deploying in production or against systems without consent.
-                            </small>
+                        <div class="tokenade-disclaimer">
+                            <i class="fas fa-triangle-exclamation"></i>
+                            <span><strong>Safety notice:</strong> Tokenade payloads can severely degrade model performance and crash UIs. Use for testing only. Do not deploy to production or target systems without explicit permission.</span>
                         </div>
                         <div class="tokenade-presets">
                             <button class="transform-button" title="Very light density" @click="applyTokenadePreset('feather')">🪶 Featherweight</button>
@@ -331,7 +330,7 @@
                             </label>
                         </div>
                         <div class="token-bomb-actions">
-                            <button class="transform-button" @click="generateTokenBomb" title="Build the tokenade with current settings">
+                            <button class="transform-button" @click="checkTokenadeDangerThenGenerate" title="Build the tokenade with current settings">
                                 <i class="fas fa-hammer"></i> Generate Tokenade
                             </button>
                             <button class="copy-button" v-if="tokenBombOutput" @click="copyToClipboard(tokenBombOutput)">
@@ -801,6 +800,24 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danger Zone Modal -->
+    <div v-if="showDangerModal" class="danger-modal-backdrop">
+        <div class="danger-modal">
+            <div class="danger-header">
+                <i class="fas fa-radiation"></i>
+                <strong>Danger zone warning</strong>
+            </div>
+            <div class="danger-body">
+                <p>Your projected payload size exceeds <strong>25,000,000</strong> characters. Generating this will very likely <strong>freeze/crash</strong> your browser or downstream tools, and can rack up serious costs if sent to a model.</p>
+                <p>Proceed only if you fully understand the risks and are testing in a safe, isolated environment.</p>
+            </div>
+            <div class="danger-actions">
+                <button class="danger-cancel" @click="cancelDangerAction">Cancel</button>
+                <button class="danger-proceed" @click="proceedDangerAction"><i class="fas fa-skull-crossbones"></i> I understand, proceed</button>
             </div>
         </div>
     </div>

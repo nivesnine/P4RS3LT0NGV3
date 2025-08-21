@@ -86,7 +86,12 @@ window.app = new Vue({
         copyHistory: [],
         maxHistoryItems: 10,
         showCopyHistory: false,
-        showUnicodePanel: false
+        showUnicodePanel: false,
+
+        // Danger zone controls
+        showDangerModal: false,
+        dangerThresholdTokens: 25_000_000,
+        _pendingTokenadeAction: null
     },
     methods: {
         toggleUnicodePanel() {
@@ -1698,6 +1703,32 @@ window.app = new Vue({
             });
         }
         ,
+        // Quick estimate of token count for Tokenade
+        estimateTokenadeTokens() {
+            // Roughly approximate tokens by estimated character length
+            // This intentionally errs on the conservative side for warning purposes
+            const approx = this.estimateTokenadeLength();
+            return Math.max(0, approx);
+        },
+
+        // Confirm danger threshold before generating
+        checkTokenadeDangerThenGenerate() {
+            const estTokens = this.estimateTokenadeTokens();
+            if (estTokens > this.dangerThresholdTokens) {
+                this._pendingTokenadeAction = 'generate';
+                this.showDangerModal = true;
+                return;
+            }
+            this.generateTokenBomb();
+        },
+
+        // Proceed/cancel handlers for modal
+        proceedDangerAction() {
+            const action = this._pendingTokenadeAction; this._pendingTokenadeAction = null; this.showDangerModal = false;
+            if (action === 'generate') this.generateTokenBomb();
+        },
+        cancelDangerAction() { this._pendingTokenadeAction = null; this.showDangerModal = false; },
+
         // Token Bomb Generator Logic
         generateTokenBomb() {
             const depth = Math.max(1, Math.min(8, Number(this.tbDepth) || 1));
