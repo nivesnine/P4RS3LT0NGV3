@@ -2023,12 +2023,12 @@ html {
 .tokenade-presets {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: nowrap;
-    overflow-x: auto;
+    overflow-x: visible;
     margin: 8px 0 12px 0;
 }
-.tokenade-presets .transform-button { flex: 0 0 auto; min-width: 160px; }
+.tokenade-presets .transform-button { flex: 0 0 auto; min-width: 136px; padding: 5px 8px; }
 
 /* Quick picks panel */
 .carrier-quick-grid { 

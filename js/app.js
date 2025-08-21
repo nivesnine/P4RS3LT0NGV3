@@ -1909,7 +1909,7 @@ window.app = new Vue({
         }
         ,
         // Tokenizer visualization
-        runTokenizer() {
+        async runTokenizer() {
             const text = this.tokenizerInput || '';
             const engine = this.tokenizerEngine;
             const tokens = [];
@@ -1925,15 +1925,20 @@ window.app = new Vue({
                 // Naive word split incl. punctuation
                 const parts = text.split(/(\s+|[\.,!?:;()\[\]{}])/);
                 for (const p of parts) { if (p) tokens.push({ text: p }); }
-            } else if (engine === 'gpt3' && window.gpt3enc && window.gpt3enc.encode) {
+            } else if (['cl100k','o200k','p50k','r50k'].includes(engine)) {
                 try {
-                    const ids = window.gpt3enc.encode(text);
+                    if (!window.gptTok) {
+                        window.gptTok = await import('https://cdn.jsdelivr.net/npm/gpt-tokenizer@2/+esm');
+                    }
+                    const map = { cl100k: 'cl100k_base', o200k: 'o200k_base', p50k: 'p50k_base', r50k: 'r50k_base' };
+                    const enc = map[engine];
+                    const ids = window.gptTok.encode(text, enc);
                     for (const id of ids) {
-                        const piece = window.gpt3enc.decode([id]);
+                        const piece = window.gptTok.decode([id], enc);
                         tokens.push({ id, text: piece });
                     }
                 } catch (e) {
-                    console.warn('gpt-3-encoder not available', e);
+                    console.warn('Failed to load/use gpt-tokenizer; falling back to bytes', e);
                     this.tokenizerEngine = 'byte';
                     return this.runTokenizer();
                 }
