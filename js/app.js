@@ -52,6 +52,7 @@ window.app = new Vue({
         // Emoji Library
         filteredEmojis: [...window.emojiLibrary.EMOJI_LIST],
         selectedEmoji: null,
+        carrierEmojiList: [...window.emojiLibrary.EMOJI_LIST],
         // Token Bomb Generator
         tbDepth: 3,
         tbBreadth: 4,
@@ -1856,6 +1857,35 @@ window.app = new Vue({
         },
         clearTokenadePayload() { this.tbPayloadEmojis = []; },
         removeTokenadePayloadAt(idx) { this.tbPayloadEmojis.splice(idx, 1); },
+        onCarrierInput() {
+            const q = (this.tbCarrier || '').trim();
+            if (!q) {
+                this.carrierEmojiList = [...window.emojiLibrary.EMOJI_LIST];
+                return;
+            }
+            // Filter emoji list by simple name guess or by including the character; if q contains an emoji, keep it
+            const list = window.emojiLibrary.EMOJI_LIST;
+            const byChar = list.filter(e => e.includes(q));
+            // Also support colon-like query (e.g., ':heart') by rough keywords
+            const keywords = {
+                heart: ['❤️','💛','💚','💙','💜','💖','💘','💝','💗'],
+                star: ['⭐','🌟'],
+                fire: ['🔥'],
+                bomb: ['💣'],
+                snake: ['🐍'],
+                dragon: ['🐉','🐲'],
+                skull: ['💀'],
+                sparkles: ['✨'],
+                moon: ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘','🌙']
+            };
+            let byKey = [];
+            const qk = q.replace(/[:_\s]/g,'').toLowerCase();
+            Object.keys(keywords).forEach(k => {
+                if (k.indexOf(qk) !== -1) byKey = byKey.concat(keywords[k]);
+            });
+            const merged = Array.from(new Set([...byChar, ...byKey]));
+            this.carrierEmojiList = merged.length ? merged : [...window.emojiLibrary.EMOJI_LIST];
+        },
         handleTokenadeDrop(e) {
             e.preventDefault();
             const text = e.dataTransfer && (e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('text'));

@@ -674,12 +674,22 @@
                 </div>
                 <div class="tokenade-carrier-options options-grid">
                     <label title="Condense payload into a single emoji carrier">
-                        Single carrier mode
+                        Single emoji carrier mode
                         <input type="checkbox" v-model="tbSingleCarrier" />
                     </label>
-                    <label v-if="tbSingleCarrier" title="Pick the carrier emoji">
+                    <label v-if="tbSingleCarrier" title="Choose the carrier emoji (type to search, paste, or drop)">
                         Carrier
-                        <input type="text" v-model="tbCarrier" placeholder="Drop or type an emoji" @focus="setCarrierFromSelected" />
+                        <input 
+                            type="text" 
+                            v-model="tbCarrier" 
+                            placeholder="Type to search/paste an emoji"
+                            list="emoji-carrier-list"
+                            @focus="setCarrierFromSelected"
+                            @input="onCarrierInput"
+                        />
+                        <datalist id="emoji-carrier-list">
+                            <option v-for="em in carrierEmojiList" :key="em" :value="em">{{ em }}</option>
+                        </datalist>
                     </label>
                 </div>
                 <div v-if="tbSingleCarrier" class="tokenade-payload-drop">
