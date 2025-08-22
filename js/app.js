@@ -128,21 +128,26 @@ window.app = new Vue({
                 const orderSel = document.querySelector('.steg-bit-order');
                 const trailSel = document.querySelector('.steg-trailing-zw');
 
-                if (window.steganography && window.steganography.setOptions) {
-                    window.steganography.setOptions({
-                        initialPresentation: initSel && initSel.value || 'none',
-                        vsZero: vs0Sel && vs0Sel.value || '\\ufe0e',
-                        vsOne: vs1Sel && vs1Sel.value || '\\ufe0f',
-                        interbitZW: zwSel && zwSel.value || '',
-                        interbitEvery: Math.max(1, Math.min(8, Number(everyInput && everyInput.value || 1))),
-                        bitOrder: orderSel && orderSel.value || 'msb',
-                        trailingZW: trailSel && trailSel.value || ''
+                const parseEsc = (s)=>{
+                    if (!s) return s;
+                    try { return eval(`'${s}'`); } catch(_) { return s; }
+                };
+
+                if (window.steganography && window.steganography.setStegOptions) {
+                    window.steganography.setStegOptions({
+                        initialPresentation: (initSel && initSel.value) || 'none',
+                        bitZeroVS: parseEsc(vs0Sel && vs0Sel.value) || '\ufe0e',
+                        bitOneVS: parseEsc(vs1Sel && vs1Sel.value) || '\ufe0f',
+                        interBitZW: parseEsc(zwSel && zwSel.value) || null,
+                        interBitEvery: Math.max(1, Math.min(8, Number((everyInput && everyInput.value) || 1))),
+                        bitOrder: (orderSel && orderSel.value) || 'msb',
+                        trailingZW: parseEsc(trailSel && trailSel.value) || ''
                     });
                     this.unicodeApplyFlash = true;
                     this.showNotification('<i class="fas fa-sliders-h"></i> Advanced settings applied', 'success');
                     setTimeout(()=>{ this.unicodeApplyFlash = false; }, 1200);
                 } else {
-                    this.showNotification('<i class="fas fa-exclamation-triangle"></i> Engine missing setOptions()', 'warning');
+                    this.showNotification('<i class="fas fa-exclamation-triangle"></i> Engine missing setStegOptions()', 'warning');
                 }
             } catch (e) {
                 console.error('Apply Unicode options error', e);
