@@ -603,14 +603,48 @@ window.emojiLibrary.renderEmojiGrid = function(containerId, onEmojiSelect, filte
             // Update active tab
             categoryTabButtons.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            
-            // Re-render the emoji grid with the selected category
+
+            // Get the selected category
             const selectedCategory = tab.getAttribute('data-category');
             console.log('Category selected:', selectedCategory);
-            
-            // Clear and recreate the grid
-            container.removeChild(gridContainer);
-            window.emojiLibrary.renderEmojiGrid(containerId, onEmojiSelect);
+
+            // Determine which emojis to show
+            let emojisToShow = [];
+            if (selectedCategory === 'all') {
+                // For 'all' category, combine all emojis from the categories
+                Object.values(window.emojiLibrary.EMOJIS).forEach(categoryEmojis => {
+                    emojisToShow = [...emojisToShow, ...categoryEmojis];
+                });
+            } else if (window.emojiLibrary.EMOJIS[selectedCategory]) {
+                // For specific category, use emojis from that category
+                emojisToShow = window.emojiLibrary.EMOJIS[selectedCategory];
+            }
+
+            console.log(`Updating grid with ${emojisToShow.length} emojis for category: ${selectedCategory}`);
+
+            // Clear only the grid and rebuild it
+            gridContainer.innerHTML = '';
+
+            // Add emojis to grid
+            emojisToShow.forEach(emoji => {
+                const emojiButton = document.createElement('button');
+                emojiButton.className = 'emoji-button';
+                emojiButton.textContent = emoji;
+                emojiButton.title = 'Click to encode with this emoji';
+
+                emojiButton.addEventListener('click', () => {
+                    if (typeof onEmojiSelect === 'function') {
+                        onEmojiSelect(emoji);
+                        // Add visual feedback when clicked
+                        emojiButton.style.backgroundColor = '#e6f7ff';
+                        setTimeout(() => {
+                            emojiButton.style.backgroundColor = '';
+                        }, 300);
+                    }
+                });
+
+                gridContainer.appendChild(emojiButton);
+            });
         });
     });
     
