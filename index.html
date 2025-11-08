@@ -6,8 +6,8 @@
     <title>Parseltongue 2.0 - LLM Payload Crafter</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/notification.css">
-    <!-- Vue.js -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <!-- Vue.js (Production Build) -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -185,7 +185,7 @@
                                 <div class="decode-result">{{ universalDecodeResult.text }}</div>
                                 <div class="decode-actions">
                                     <button class="copy-button" @click="copyToClipboard(universalDecodeResult.text)" title="Copy decoded text">
-                                        <i class="fas fa-copy"></i> Copy
+                                        <i class="fas fa-copy"></i>
                                     </button>
                                     <button class="use-as-input-button" v-if="universalDecodeResult.text" @click="transformInput = universalDecodeResult.text" title="Use this as input for transforms">
                                         <i class="fas fa-arrow-up"></i> Use as Input
@@ -291,13 +291,6 @@
                                 <input class="hacker-slider" type="range" v-model.number="tbRepeats" min="1" max="50" />
                                 <span class="slider-value">{{ tbRepeats }}</span>
                             </label>
-                            <div class="segmented" title="Invisible separator inserted between units">
-                                <div class="segmented-label">Separator</div>
-                                <button :class="{active: tbSeparator==='zwj'}" @click="tbSeparator='zwj'">ZWJ</button>
-                                <button :class="{active: tbSeparator==='zwnj'}" @click="tbSeparator='zwnj'">ZWNJ</button>
-                                <button :class="{active: tbSeparator==='zwsp'}" @click="tbSeparator='zwsp'">ZWSP</button>
-                                <button :class="{active: tbSeparator==='none'}" @click="tbSeparator='none'">None</button>
-                            </div>
                             <label class="switch neon" title="Adds VS16/VS15 after glyphs to increase token churn">
                                 <input type="checkbox" v-model="tbIncludeVS" />
                                 <span>Variation Selectors</span>
@@ -311,6 +304,15 @@
                                 <input type="checkbox" v-model="tbAutoCopy" />
                                 <span>Auto-copy</span>
                             </label>
+                            <div class="segmented" title="Invisible separator inserted between units">
+                                <div class="segmented-label">Separator</div>
+                                <div>
+                                    <button :class="{active: tbSeparator==='zwj'}" @click="tbSeparator='zwj'">ZWJ</button>
+                                    <button :class="{active: tbSeparator==='zwnj'}" @click="tbSeparator='zwnj'">ZWNJ</button>
+                                    <button :class="{active: tbSeparator==='zwsp'}" @click="tbSeparator='zwsp'">ZWSP</button>
+                                    <button :class="{active: tbSeparator==='none'}" @click="tbSeparator='none'">None</button>
+                                </div>
+                            </div>
                         </div>
                         <div class="output-instructions">
                             <small>
@@ -331,7 +333,7 @@
                             <label v-if="tbSingleCarrier" title="Choose the carrier emoji (quick list)">
                                 Carrier
                                 <select v-model="tbCarrier" @focus="setCarrierFromSelected">
-                                    <option v-for="em in carrierEmojiList" :key="em" :value="em">{{ em }}</option>
+                                    <option v-for="(em, index) in carrierEmojiList" :key="'carrier-'+index" :value="em">{{ em }}</option>
                                 </select>
                             </label>
                             <label v-if="tbSingleCarrier" title="Advanced: use this symbol or string as the embedded payload for encoding">
@@ -345,7 +347,7 @@
                                 <i class="fas fa-hammer"></i> Generate Tokenade
                             </button>
                             <button class="copy-button" v-if="tokenBombOutput" @click="copyToClipboard(tokenBombOutput)">
-                                <i class="fas fa-copy"></i> Copy
+                                <i class="fas fa-copy"></i>
                             </button>
                             <div class="output-instructions" v-if="tokenBombOutput">
                                 <small>
@@ -384,7 +386,7 @@
                                 <i class="fas fa-hammer"></i> Generate Text Payload
                             </button>
                             <button class="copy-button" v-if="textPayload" @click="copyToClipboard(textPayload)">
-                                <i class="fas fa-copy"></i> Copy
+                                <i class="fas fa-copy"></i>
                             </button>
                         </div>
                         <div class="output-container" v-if="textPayload">
@@ -456,16 +458,18 @@
                     <div class="transform-section">
                         <div class="transform-category-legend">
                             <div class="legend-title">Categories:</div>
-                            <div class="legend-item transform-category-encoding" data-target="category-encoding">Encoding</div>
-                            <div class="legend-item transform-category-cipher" data-target="category-cipher">Ciphers</div>
-                            <div class="legend-item transform-category-visual" data-target="category-visual">Visual</div>
-                            <div class="legend-item transform-category-format" data-target="category-format">Formatting</div>
-                            <div class="legend-item transform-category-unicode" data-target="category-unicode">Unicode</div>
-                            <div class="legend-item transform-category-special" data-target="category-special">Special</div>
-                            <div class="legend-item transform-category-fantasy" data-target="category-fantasy">Fantasy</div>
-                            <div class="legend-item transform-category-ancient" data-target="category-ancient">Ancient</div>
-                            <div class="legend-item transform-category-technical" data-target="category-technical">Technical</div>
-                            <div class="legend-item transform-category-randomizer" data-target="category-randomizer">🎲 Randomizer</div>
+                            <div>
+                                <div class="legend-item transform-category-encoding" data-target="category-encoding">Encoding</div>
+                                <div class="legend-item transform-category-cipher" data-target="category-cipher">Ciphers</div>
+                                <div class="legend-item transform-category-visual" data-target="category-visual">Visual</div>
+                                <div class="legend-item transform-category-format" data-target="category-format">Formatting</div>
+                                <div class="legend-item transform-category-unicode" data-target="category-unicode">Unicode</div>
+                                <div class="legend-item transform-category-special" data-target="category-special">Special</div>
+                                <div class="legend-item transform-category-fantasy" data-target="category-fantasy">Fantasy</div>
+                                <div class="legend-item transform-category-ancient" data-target="category-ancient">Ancient</div>
+                                <div class="legend-item transform-category-technical" data-target="category-technical">Technical</div>
+                                <div class="legend-item transform-category-randomizer" data-target="category-randomizer">🎲 Randomizer</div>
+                            </div>
                         </div>
                         <div class="transform-categories">
                             <!-- Encoding Category -->
@@ -817,7 +821,7 @@
                                 <div class="decode-result">{{ universalDecodeResult.text }}</div>
                                 <div class="decode-actions">
                                     <button class="copy-button" @click="copyToClipboard(universalDecodeResult.text)" title="Copy decoded text">
-                                        <i class="fas fa-copy"></i> Copy
+                                        <i class="fas fa-copy"></i>
                                     </button>
                                     <button class="use-as-input-button" v-if="universalDecodeResult.text" @click="transformInput = universalDecodeResult.text" title="Use this as input for transforms">
                                         <i class="fas fa-arrow-up"></i> Use as Input
@@ -853,13 +857,16 @@
                             </div>
                             <div class="history-actions">
                                 <button class="copy-again-button" @click="copyToClipboard(item.content)" title="Copy again">
-                                    <i class="fas fa-copy"></i> Copy Again
+                                    <i class="fas fa-copy"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+        <!-- End of .tabs div -->
+        
         <!-- Advanced Settings Panel (inside app so Vue bindings work) -->
         <div id="unicode-options-panel" class="unicode-options-panel">
             <div class="unicode-panel-header">
@@ -929,7 +936,10 @@
         </div>
 
     </div>
+    <!-- End of #app div -->
 
+    <!-- Load JavaScript files after Vue template -->
+    <script src="js/emojiWordMap.js"></script>
     <script src="js/transforms.js"></script>
     <script src="js/steganography.js"></script>
     <script src="js/emojiLibrary.js"></script>
@@ -1004,6 +1014,13 @@
             
             console.log('Initializing emoji grid, attempt:', retryCount + 1);
             
+            // Check if we're on the steganography tab before trying to initialize
+            const app = document.getElementById('app').__vue__;
+            if (!app || app.activeTab !== 'steganography') {
+                console.log('Not on steganography tab, skipping emoji grid initialization');
+                return;
+            }
+            
             // Get the emoji library element
             const emojiLibrary = document.querySelector('.emoji-library');
             
@@ -1019,7 +1036,6 @@
                     try {
                         window.emojiLibrary.renderEmojiGrid('emoji-grid-container', function(emoji) {
                             // Simulate emoji selection by calling the Vue method if possible
-                            const app = document.getElementById('app').__vue__;
                             if (app && app.selectEmoji) {
                                 app.selectEmoji(emoji);
                             }
@@ -1044,10 +1060,7 @@
         
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // First attempt after a short delay to ensure Vue has initialized
-            setTimeout(initEmojiGrid, 500);
-            
-            // Also initialize when switching to the steganography tab
+            // Set up watcher for tab changes to initialize emoji grid when needed
             const app = document.getElementById('app');
             if (app && app.__vue__) {
                 const vue = app.__vue__;
@@ -1060,6 +1073,11 @@
                             setTimeout(initEmojiGrid, 100);
                         }
                     });
+                }
+                
+                // If we're already on the steganography tab on page load, initialize it
+                if (vue.activeTab === 'steganography') {
+                    setTimeout(initEmojiGrid, 500);
                 }
             }
         });

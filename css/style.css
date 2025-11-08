@@ -66,6 +66,7 @@ body {
 
 header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
@@ -855,7 +856,6 @@ button:hover {
 
 /* Transform layout */
 .transform-layout {
-    display: grid;
     gap: 24px;
     margin-top: 16px;
 }
@@ -875,6 +875,12 @@ button:hover {
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--input-border);
+}
+
+.transform-category-legend > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .legend-title {
@@ -989,6 +995,20 @@ button:hover {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 8px;
     margin-bottom: 16px;
+    width: 100%; /* Ensure grid doesn't overflow container */
+    box-sizing: border-box;
+}
+
+#category-randomizer .transform-buttons {
+    display: flex;
+}
+
+#category-randomizer .transform-buttons .transform-button-group {
+    width: 100%;
+}
+
+#category-randomizer .transform-buttons .transform-button .transform-preview {
+    max-width: 300px;
 }
 
 /* Carrier styling */
@@ -1308,8 +1328,7 @@ button:hover {
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    min-width: 110px;
-    max-width: 100%;
+    width: 100%;
     font-weight: 500;
     text-align: center;
     border: 1px solid var(--input-border);
@@ -1816,7 +1835,6 @@ button:hover {
     border: 2px solid rgba(200, 170, 255, 0.35) !important;
     padding: 18px 28px !important;
     letter-spacing: .3px;
-    min-width: 48ch;
     justify-content: center;
     text-align: center;
 }
@@ -1976,9 +1994,6 @@ html {
 .tokenade-presets > label {
     margin-right: 4px;
 }
-.tokenade-presets .transform-button {
-    padding: 6px 10px;
-}
 
 /* Hacker style controls */
 .hacker-controls {
@@ -2086,14 +2101,14 @@ html {
 
 /* Presets row polish */
 .tokenade-presets {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: nowrap;
-    overflow-x: visible;
     margin: 8px 0 12px 0;
 }
-.tokenade-presets .transform-button { flex: 0 0 auto; min-width: 136px; padding: 5px 8px; }
+
+.tokenade-presets .transform-button {
+    flex: 1 0 auto;
+    padding: 5px 8px;
+    width: unset;
+}
 
 /* Quick picks panel */
 .carrier-quick-grid { 
