@@ -99,6 +99,13 @@
                 >
                     <i class="fas fa-comments"></i> Gibberish
                 </button>
+                <button 
+                    :class="{ active: activeTab === 'splitter' }" 
+                    @click="switchToTab('splitter')"
+                    title="Split text into multiple copyable messages"
+                >
+                    <i class="fas fa-grip-lines"></i> Splitter
+                </button>
             </div>
 
             <!-- Steganography Tab -->
@@ -573,7 +580,7 @@
                             <h3><i class="fas fa-bug"></i> Mutation Lab <small>mutate text into diverse payloads</small></h3>
                         </div>
                         <div class="options-grid">
-                            <label>
+                            <label style="grid-column: 1 / -1;">
                                 Base text
                                 <textarea v-model="fuzzerInput" placeholder="Enter seed text to fuzz..." rows="3"></textarea>
                             </label>
@@ -995,6 +1002,157 @@
                                     <button class="use-as-input-button" v-if="universalDecodeResult.text" @click="transformInput = universalDecodeResult.text" title="Use this as input for transforms">
                                         <i class="fas fa-arrow-up"></i> Use as Input
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Splitter Tab -->
+            <div v-if="activeTab === 'splitter'" class="tab-content">
+                <div class="transform-layout">
+                    <div class="transform-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-grip-lines"></i> Message Splitter <small>split text into multiple copyable chunks</small></h3>
+                            <p>Enter text to split into multiple messages. Each message can be transformed and encapsulated individually.</p>
+                        </div>
+                        
+                        <!-- Input Section -->
+                        <div class="input-section">
+                            <textarea 
+                                id="splitter-input" 
+                                v-model="splitterInput" 
+                                placeholder="Enter text to split into messages..."
+                                rows="4"
+                            ></textarea>
+                        </div>
+
+                        <!-- Options Section -->
+                        <div class="options-grid">
+                            <label>
+                                Split Mode
+                                <select v-model="splitterMode">
+                                    <option value="chunk">Character Chunks</option>
+                                    <option value="word">Split Words in Half</option>
+                                </select>
+                            </label>
+                            
+                            <!-- Chunk Mode Options -->
+                            <label v-if="splitterMode === 'chunk'">
+                                Chunk Size (characters)
+                                <input type="number" v-model.number="splitterChunkSize" min="1" max="500" />
+                            </label>
+                            
+                            <!-- Word Mode Options -->
+                            <label v-if="splitterMode === 'word'">
+                                Odd-Length Word Preference
+                                <select v-model="splitterWordSplitSide">
+                                    <option value="left">Left (longer first half for odd words)</option>
+                                    <option value="right">Right (longer second half for odd words)</option>
+                                </select>
+                            </label>
+                            <label v-if="splitterMode === 'word'">
+                                <span class="label-with-tooltip">
+                                    Skip Words Between Splits
+                                    <i class="fas fa-info-circle tooltip-icon" title="0 = split every word, 1 = skip 1 word between splits, etc."></i>
+                                </span>
+                                <input type="number" v-model.number="splitterWordSkip" min="0" max="20" />
+                            </label>
+                            <label v-if="splitterMode === 'word'">
+                                <span class="label-with-tooltip">
+                                    Min Word Length to Split
+                                    <i class="fas fa-info-circle tooltip-icon" title="Ignore words shorter than this (default: 2)"></i>
+                                </span>
+                                <input type="number" v-model.number="splitterMinWordLength" min="1" max="20" />
+                            </label>
+                            <label v-if="splitterMode === 'word'" class="switch neon">
+                                <input type="checkbox" v-model="splitterSplitFirstWord" />
+                                <span>Split First Word</span>
+                            </label>
+                        </div>
+
+                        <!-- Transform Section -->
+                        <div class="transform-section">
+                            <div class="section-header">
+                                <h4><i class="fas fa-magic"></i> Transform</h4>
+                                <p>Apply transformations to each split message individually. Transformations are applied in sequence.</p>
+                            </div>
+                            <div class="transform-chain">
+                                <div class="transform-chain-inline">
+                                    <div v-for="(transform, index) in splitterTransforms" :key="'transform-'+index" class="transform-chain-item">
+                                        <select v-model="splitterTransforms[index]" @change="handleTransformChange(index)">
+                                            <option value="">None</option>
+                                            <option v-for="t in transforms" :key="t.name" :value="t.name">
+                                                {{ t.name }}
+                                            </option>
+                                        </select>
+                                        <i v-if="index < splitterTransforms.length - 1" class="fas fa-arrow-right transform-arrow"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Encapsulation Options -->
+                        <div class="encapsulation-section">
+                            <div class="section-header">
+                                <h4><i class="fas fa-bracket-curly"></i> Encapsulation</h4>
+                                <p>Wrap each message with custom start and end strings</p>
+                            </div>
+                            <div class="options-grid">
+                                <label>
+                                    Start String (optional)
+                                    <input type="text" v-model="splitterStartWrap" placeholder="e.g., $, <, [" />
+                                </label>
+                                <label>
+                                    End String (optional)
+                                    <input type="text" v-model="splitterEndWrap" placeholder="e.g., $, >, ]" />
+                                </label>
+                            </div>
+                            <div class="encapsulation-presets">
+                                <small>Quick presets:</small>
+                                <button @click="setEncapsulation('$', '$')" class="preset-btn">$...$</button>
+                                <button @click="setEncapsulation('<', '>')" class="preset-btn">&lt;...&gt;</button>
+                                <button @click="setEncapsulation('[', ']')" class="preset-btn">[...]</button>
+                                <button @click="setEncapsulation('(', ')')" class="preset-btn">(...)</button>
+                                <button @click="setEncapsulation('{', '}')" class="preset-btn">{...}</button>
+                                <button @click="setEncapsulation('`', '`')" class="preset-btn">`...`</button>
+                                <button @click="setEncapsulation('&quot;', '&quot;')" class="preset-btn">&quot;...&quot;</button>
+                                <button @click="setEncapsulation('', '')" class="preset-btn">Clear</button>
+                            </div>
+                        </div>
+
+                        <!-- Generate Button -->
+                        <div class="token-bomb-actions splitter-actions">
+                            <button class="transform-button" @click="generateSplitMessages">
+                                <i class="fas fa-cut"></i> Split Messages
+                            </button>
+                            <button class="action-button copy" v-if="splitMessages.length" @click="copyAllSplitMessages">
+                                <i class="fas fa-copy"></i> Copy All
+                            </button>
+                            <label v-if="splitMessages.length" class="switch neon splitter-copy-option">
+                                <input type="checkbox" v-model="splitterCopyAsSingleLine" />
+                                <span>Single Line</span>
+                            </label>
+                        </div>
+
+                        <!-- Output Section -->
+                        <div class="output-section split-messages-container" v-if="splitMessages.length">
+                            <div class="output-heading">
+                                <h4>
+                                    <i class="fas fa-list"></i> Split Messages
+                                    <small>{{ splitMessages.length }} message(s)</small>
+                                </h4>
+                            </div>
+                            <div class="split-messages-grid">
+                                <div v-for="(message, index) in splitMessages" :key="'msg-'+index" class="split-message-card">
+                                    <div class="split-message-header">
+                                        <span class="message-number">#{{ index + 1 }}</span>
+                                        <button class="copy-button-small" @click="copyToClipboard(message)" title="Copy this message">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="split-message-content">{{ message }}</div>
                                 </div>
                             </div>
                         </div>

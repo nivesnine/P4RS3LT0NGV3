@@ -2057,7 +2057,16 @@ html {
     color: var(--main-bg-color);
     border-color: var(--accent-color);
 }
-.switch { display:flex; gap:6px; align-items:center; padding: 6px 8px; background: var(--main-bg-color); border:1px solid var(--input-border); border-radius:6px; }
+.switch { 
+    display:flex; 
+    gap:8px; 
+    align-items:center; 
+    padding: 6px 8px 6px 8px; 
+    background: var(--main-bg-color); 
+    border:1px solid var(--input-border); 
+    border-radius:6px;
+    margin-left: 6px;
+}
 .switch span { opacity:.85; }
 .switch.neon { border-color:#1b5e20; box-shadow:0 0 0 1px rgba(76,175,80,.15) inset, 0 0 10px rgba(76,175,80,.15); }
 .switch.neon input[type="checkbox"] {
@@ -2160,3 +2169,368 @@ html {
 .mutation-actions .action-button.copy:hover { color: #bbdefb; box-shadow: 0 0 0 1px rgba(144,202,249,.2) inset, 0 0 14px rgba(144,202,249,.18); }
 .mutation-actions .action-button.download { border-color: #2e7d32; color: #69f0ae; }
 .mutation-actions .action-button.download:hover { color: #b9f6ca; box-shadow: 0 0 0 1px rgba(105,240,174,.2) inset, 0 0 14px rgba(105,240,174,.18); }
+
+/* Message Splitter Styles */
+.encapsulation-section {
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--main-bg-color);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+}
+
+.encapsulation-section .section-header {
+    margin-bottom: 16px;
+}
+
+.encapsulation-section .section-header h4 {
+    margin-bottom: 4px;
+    margin-top: 0;
+    color: var(--accent-color);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.encapsulation-section .section-header p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+.encapsulation-presets {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.encapsulation-presets small {
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-right: 4px;
+}
+
+.preset-btn {
+    padding: 6px 12px;
+    background: var(--button-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+}
+
+.preset-btn:hover {
+    background: var(--button-hover-bg);
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+}
+
+.preset-btn:active {
+    transform: translateY(0);
+}
+
+.split-messages-container {
+    margin-top: 16px;
+}
+
+.split-messages-container .output-heading {
+    margin-bottom: 12px;
+}
+
+.split-messages-container .output-heading h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-color);
+    margin-bottom: 0;
+}
+
+.split-messages-container .output-heading h4 small {
+    font-size: 0.7em;
+    font-weight: normal;
+    color: var(--text-muted);
+    background-color: rgba(100, 181, 246, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+}
+
+.split-messages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.split-message-card {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    padding: 12px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.split-message-card:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 2px 8px rgba(100, 181, 246, 0.1);
+    transform: translateY(-2px);
+}
+
+.split-message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--input-border);
+}
+
+.message-number {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-family: 'Fira Code', monospace;
+}
+
+.copy-button-small {
+    padding: 4px 8px;
+    background: var(--button-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    color: var(--accent-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.copy-button-small:hover {
+    background: var(--accent-color);
+    color: var(--main-bg-color);
+    transform: scale(1.05);
+}
+
+.copy-button-small i {
+    font-size: 0.85rem;
+}
+
+.split-message-content {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    word-break: break-all;
+    line-height: 1.5;
+    min-height: 40px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+/* Ensure consistent spacing with other tabs */
+.tab-content .transform-layout .transform-section {
+    margin-bottom: 16px;
+}
+
+.tab-content .transform-layout .transform-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Options grid styling (used across multiple tabs) */
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.options-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.options-grid label.switch {
+    flex-direction: row;
+    gap: 8px;
+}
+
+.options-grid label small {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: -2px;
+}
+
+.label-with-tooltip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tooltip-icon {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: help;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.tooltip-icon:hover {
+    opacity: 1;
+    color: var(--accent-color);
+}
+
+.options-grid input[type="number"],
+.options-grid input[type="text"],
+.options-grid select {
+    background: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.options-grid input[type="number"]:focus,
+.options-grid input[type="text"]:focus,
+.options-grid select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+    outline: none;
+}
+
+.options-grid .switch {
+    margin-bottom: 0;
+    margin-left: 6px;
+    margin-top: auto;
+    padding: 6px 8px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    height: fit-content;
+    min-height: 38px;
+    max-height: 38px;
+    align-self: flex-end;
+}
+
+/* Transform chain styling */
+.transform-chain {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.transform-chain-inline {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.transform-chain-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.transform-chain-item select {
+    background: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    min-width: 200px;
+}
+
+.transform-chain-item select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+    outline: none;
+}
+
+.transform-arrow {
+    color: var(--accent-color);
+    font-size: 1rem;
+    opacity: 0.7;
+    margin: 0 4px;
+}
+
+.remove-transform-inline-btn {
+    padding: 4px 6px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    opacity: 0.6;
+}
+
+.remove-transform-inline-btn:hover {
+    background: rgba(211, 47, 47, 0.1);
+    color: #d32f2f;
+    opacity: 1;
+}
+
+.add-transform-inline-btn {
+    padding: 8px 12px;
+    background: var(--button-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    color: var(--accent-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 38px;
+}
+
+.add-transform-inline-btn:hover {
+    background: var(--button-hover-bg);
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+}
+
+.add-transform-inline-btn i {
+    font-size: 0.9rem;
+}
+
+/* Splitter-specific action button styling */
+.splitter-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 16px 0 0 0;
+}
+
+.splitter-copy-option {
+    margin-left: 0;
+}
+
+/* Responsive adjustments for splitter */
+@media (max-width: 768px) {
+    .split-messages-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .encapsulation-presets {
+        gap: 6px;
+    }
+    
+    .preset-btn {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+    }
+}
