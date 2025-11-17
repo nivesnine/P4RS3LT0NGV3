@@ -15,8 +15,8 @@ window.app = new Vue({
         // Transform categories for styling
         transformCategories: {
             encoding: ['Base64', 'Base64 URL', 'Base32', 'Base45', 'Base58', 'Base62', 'Binary', 'Hexadecimal', 'ASCII85', 'URL Encode', 'HTML Entities'],
-            cipher: ['Caesar Cipher', 'ROT13', 'ROT47', 'Morse Code', 'Atbash Cipher', 'ROT5', 'Vigenère Cipher', 'Rail Fence (3 Rails)', 'Baconian Cipher', 'Tap Code'],
-            visual: ['Rainbow Text', 'Strikethrough', 'Underline', 'Reverse Text', 'Alternating Case', 'Reverse Words', 'Random Case', 'Title Case', 'Sentence Case', 'Emoji Speak', 'Ubbi Dubbi', 'Rövarspråket'],
+            cipher: ['Caesar Cipher', 'ROT13', 'ROT47', 'ROT18', 'ROT5', 'Morse Code', 'Atbash Cipher', 'Vigenère Cipher', 'Affine Cipher (a=5,b=8)', 'Rail Fence (3 Rails)', 'Baconian Cipher', 'Tap Code', 'A1Z26', 'QWERTY Right Shift'],
+            visual: ['Rainbow Text', 'Strikethrough', 'Underline', 'Reverse Text', 'Alternating Case', 'Reverse Words', 'Random Case', 'Title Case', 'Sentence Case', 'Emoji Speak', 'Ubbi Dubbi', 'Rövarspråket', 'Vaporwave', 'Disemvowel'],
             format: ['Pig Latin', 'Leetspeak', 'NATO Phonetic', 'camelCase', 'snake_case', 'kebab-case'],
             unicode: ['Invisible Text', 'Upside Down', 'Full Width', 'Small Caps', 'Bubble', 'Braille', 'Greek Letters', 'Wingdings', 'Superscript', 'Subscript', 'Regional Indicator Letters', 'Fraktur', 'Cyrillic Stylized', 'Katakana', 'Hiragana', 'Roman Numerals'],
             special: ['Medieval', 'Cursive', 'Monospace', 'Double-Struck', 'Elder Futhark', 'Mirror Text', 'Zalgo'],
@@ -54,7 +54,7 @@ window.app = new Vue({
         filteredEmojis: [...window.emojiLibrary.EMOJI_LIST],
         selectedEmoji: null,
         carrierEmojiList: [...window.emojiLibrary.EMOJI_LIST],
-        quickCarrierEmojis: ['🐍','🐉','🐲','🔥','💥','🗿','⚓','⭐','✨','🚀','💀','🪨','🍃','🪶','🔮','🐢','🐊','🦎','🐍'],
+        quickCarrierEmojis: ['🐍','🐉','🐲','🔥','💥','🗿','⚓','⭐','✨','🚀','💀','🪨','🍃','🪶','🔮','🐢','🐊','🦎'],
         tbCarrierManual: '',
         // Token Bomb Generator
         tbDepth: 3,
@@ -105,7 +105,10 @@ window.app = new Vue({
 
         // Danger zone controls
         showDangerModal: false,
-        dangerThresholdTokens: 25_000_000
+        dangerThresholdTokens: 25_000_000,
+        
+        // Copy operation tracking (moved from methods)
+        lastCopyTime: 0
     },
     methods: {
         toggleUnicodePanel() {
@@ -278,17 +281,8 @@ window.app = new Vue({
                         console.log('Transform mapping:', transformInfo);
                     }
                 } else {
-                    // Handle text with proper Unicode segmentation
-                    const segments = window.emojiLibrary.splitEmojis(this.transformInput);
-                    const transformedSegments = segments.map(segment => {
-                        // Skip transformation for emojis and complex Unicode characters
-                        if (segment.length > 1 || /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}]/u.test(segment)) {
-                            return segment;
-                        }
-                        return transform.func(segment);
-                    });
-                    
-                    this.transformOutput = window.emojiLibrary.joinEmojis(transformedSegments);
+                    // Apply transform to full text - let the transform handle segmentation if needed
+                    this.transformOutput = transform.func(this.transformInput);
                 }
                 
                 // Set flag to mark this as a transform-initiated copy
@@ -498,9 +492,6 @@ window.app = new Vue({
         },
         
         // Utility Methods
-        // Track last copy operation to prevent rapid repeated copies
-        lastCopyTime: 0,
-        
         async copyToClipboard(text) {
             if (!text) return;
             
@@ -1737,10 +1728,18 @@ window.app = new Vue({
                                 });
                                 item.classList.add('active-category');
                                 
-                                // Jump directly to the target element
-                                targetElement.scrollIntoView({
-                                    behavior: 'smooth',
-                                    block: 'start'
+                                // Get height of .input-section so we can offset the scroll
+                                const inputSection = document.querySelector('.input-section');
+                                const inputSectionHeight = inputSection.offsetHeight;
+                                
+                                // Calculate the target scroll position with offset
+                                const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+                                const offsetPosition = elementPosition - inputSectionHeight - 10; // Extra 10px padding
+                                
+                                // Scroll to the calculated position
+                                window.scrollTo({
+                                    top: offsetPosition,
+                                    behavior: 'smooth'
                                 });
                                 
                                 // Highlight the section briefly to draw attention
@@ -2141,6 +2140,25 @@ window.app = new Vue({
             }
             this.textPayload = out;
             this.showNotification('<i class="fas fa-bomb"></i> Text payload generated', 'success');
+        },
+        
+        // Set up paste event handlers for all textareas
+        setupPasteHandlers() {
+            // Get all textareas in the app
+            const textareas = document.querySelectorAll('textarea');
+            
+            // Add paste event listener to each textarea
+            textareas.forEach(textarea => {
+                textarea.addEventListener('paste', (e) => {
+                    // Mark this as an explicit paste event
+                    this.isPasteOperation = true;
+                    
+                    // Reset the flag after a short delay
+                    setTimeout(() => {
+                        this.isPasteOperation = false;
+                    }, 100);
+                });
+            });
         }
     },
     // Initialize theme and components
@@ -2201,24 +2219,6 @@ window.app = new Vue({
         });
     },
     
-    // Set up paste event handlers for all textareas
-    setupPasteHandlers() {
-        // Get all textareas in the app
-        const textareas = document.querySelectorAll('textarea');
-        
-        // Add paste event listener to each textarea
-        textareas.forEach(textarea => {
-            textarea.addEventListener('paste', (e) => {
-                // Mark this as an explicit paste event
-                this.isPasteOperation = true;
-                
-                // Reset the flag after a short delay
-                setTimeout(() => {
-                    this.isPasteOperation = false;
-                }, 100);
-            });
-        });
-    },
     // No keyboard shortcuts - they were removed as requested
     created() {
         // Initialize any required functionality
@@ -2233,20 +2233,10 @@ window.app = new Vue({
             if (this.activeTransform && this.activeTab === 'transforms') {
                 this.transformOutput = this.activeTransform.func(this.transformInput);
             }
-        },
-        // Make sure emoji list stays loaded when user types in any input
-        emojiMessage() {
-            this.filteredEmojis = [...window.emojiLibrary.EMOJI_LIST];
-            this.$nextTick(() => {
-                this.renderEmojiGrid();
-            });
-        },
-        // Also watch the decode input field for typing activity
-        decodeInput() {
-            this.filteredEmojis = [...window.emojiLibrary.EMOJI_LIST];
-            this.$nextTick(() => {
-                this.renderEmojiGrid();
-            });
         }
+        // Note: Removed watchers for emojiMessage and decodeInput that were
+        // unnecessarily re-rendering the emoji grid on every keystroke.
+        // The emoji grid is now only rendered when switching tabs or categories,
+        // which prevents losing the selected emoji state while typing.
     }
 });

@@ -51,9 +51,8 @@ const transforms = {
             return [...text].map(c => this.map[c] || c).reverse().join('');
         },
         preview: function(text) {
-            if (!text) return '[binary]';
-            const firstChar = text.charAt(0);
-            return firstChar.charCodeAt(0).toString(2).padStart(8, '0') + '...';
+            if (!text) return '[upside down]';
+            return this.func(text.slice(0, 8));
         },
         reverse: function(text) {
             const revMap = this.reverseMap();
@@ -80,9 +79,8 @@ const transforms = {
             return [...text.toLowerCase()].map(c => this.map[c] || c).join('');
         },
         preview: function(text) {
-            if (!text) return '[hex]';
-            const firstChar = text.charAt(0);
-            return firstChar.charCodeAt(0).toString(16).padStart(2, '0') + '...';
+            if (!text) return '[runes]';
+            return this.func(text.slice(0, 5));
         },
         reverse: function(text) {
             const revMap = this.reverseMap();
@@ -96,8 +94,8 @@ const transforms = {
             return [...text].join(' ');
         },
         preview: function(text) {
-            if (!text) return '[base64]';
-            return btoa(text.slice(0, 3)) + '...';
+            if (!text) return '[vaporwave]';
+            return [...text.slice(0, 3)].join(' ') + '...';
         },
         reverse: function(text) {
             // Remove spaces between characters
@@ -248,11 +246,19 @@ const transforms = {
     base64: {
         name: 'Base64',
         func: function(text) {
-            return btoa(text);
+            try {
+                return btoa(text);
+            } catch (e) {
+                return '[Invalid input]';
+            }
         },
         preview: function(text) {
             if (!text) return '[base64]';
-            return btoa(text.slice(0, 3)) + '...';
+            try {
+                return btoa(text.slice(0, 3)) + '...';
+            } catch (e) {
+                return '[Invalid input]';
+            }
         },
         reverse: function(text) {
             try {
@@ -267,8 +273,12 @@ const transforms = {
         name: 'Base64 URL',
         func: function(text) {
             if (!text) return '';
-            const std = btoa(text);
-            return std.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/,'');
+            try {
+                const std = btoa(text);
+                return std.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/,'');
+            } catch (e) {
+                return '[Invalid input]';
+            }
         },
         preview: function(text) {
             if (!text) return '[b64url]';
@@ -689,7 +699,12 @@ const transforms = {
     url: {
         name: 'URL Encode',
         func: function(text) {
-            return encodeURIComponent(text);
+            try {
+                return encodeURIComponent(text);
+            } catch (e) {
+                // Catch malformed Unicode or unpaired surrogates
+                return '[Invalid input]';
+            }
         },
         preview: function(text) {
             return this.func(text);
@@ -912,7 +927,8 @@ const transforms = {
             return text.split('').map(char => this.map[char] || char).join('');
         },
         preview: function(text) {
-            return text.substring(0, 10) + (text.length > 10 ? '...' : '');
+            if (!text) return '[greek]';
+            return this.func(text.slice(0, 10));
         },
         reverseMap: function() {
             if (!this._reverseMap) {
@@ -951,7 +967,8 @@ const transforms = {
             return text.split('').map(char => this.map[char] || char).join('');
         },
         preview: function(text) {
-            return text.substring(0, 10) + (text.length > 10 ? '...' : '');
+            if (!text) return '[wingdings]';
+            return this.func(text.slice(0, 10));
         },
         reverseMap: function() {
             if (!this._reverseMap) {
@@ -1032,17 +1049,37 @@ const transforms = {
             'S': 'S', 'T': 'T', 'U': 'U', 'V': 'V', 'W': 'W', 'X': 'X', 'Y': 'Y', 'Z': 'Z'
         },
         func: function(text) {
-            return [...text.toLowerCase()].map(c => this.map[c] || c).join('');
+            // Process character by character, preserving case
+            return [...text].map(c => this.map[c] || c).join('');
         },
         preview: function(text) {
-            return this.func(text);
+            if (!text) return '[klingon]';
+            return this.func(text.slice(0, 8));
         },
         reverse: function(text) {
+            // Build reverse map with multi-character strings
             const revMap = {};
             for (const [key, value] of Object.entries(this.map)) {
                 revMap[value] = key;
             }
-            return [...text].map(c => revMap[c] || c).join('');
+            // Try to match multi-character sequences first, then single chars
+            let result = '';
+            let i = 0;
+            while (i < text.length) {
+                // Try 2-character match first (for 'ch', 'gh', 'CH', 'GH')
+                const twoChar = text.substr(i, 2);
+                if (revMap[twoChar]) {
+                    result += revMap[twoChar];
+                    i += 2;
+                } else if (revMap[text[i]]) {
+                    result += revMap[text[i]];
+                    i++;
+                } else {
+                    result += text[i];
+                    i++;
+                }
+            }
+            return result;
         }
     },
     
@@ -2077,20 +2114,70 @@ const transforms = {
     },
 
     // Emoji Speak (word → emoji, digits → keycaps)
+    // Emoji keywords loaded from emojiWordMap.js
     emoji_speak: {
         name: 'Emoji Speak',
-        wordMap: {
-            'love':'❤️','heart':'❤️','fire':'🔥','cool':'😎','ok':'👌','star':'⭐','poop':'💩','yes':'✅','no':'❌',
-            'up':'⬆️','down':'⬇️','left':'⬅️','right':'➡️','question':'❓','exclamation':'❗'
-        },
         digitMap: {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣'},
         func: function(text) {
-            // replace digits
+            // Replace digits with keycap emojis
             let out = [...text].map(c => this.digitMap[c] || c).join('');
-            // replace words (case-insensitive)
-            for (const [word, emoji] of Object.entries(this.wordMap)) {
-                const re = new RegExp(`\\b${word}\\b`, 'gi');
-                out = out.replace(re, emoji);
+            
+            // Replace words with emojis using keyword lookup
+            if (window.emojiKeywords) {
+                // Split into words while preserving spaces and punctuation
+                const words = out.match(/\b\w+\b/g);
+                if (words) {
+                    // Process each unique word
+                    const processed = new Set();
+                    for (const word of words) {
+                        const lower = word.toLowerCase();
+                        if (processed.has(lower)) continue;
+                        processed.add(lower);
+                        
+                        // Find all emojis that have this word as a keyword
+                        const matchingEmojis = [];
+                        for (const [emoji, keywords] of Object.entries(window.emojiKeywords)) {
+                            if (keywords.includes(lower)) {
+                                matchingEmojis.push(emoji);
+                            }
+                        }
+                        
+                        // If we found matches, replace with a random one
+                        if (matchingEmojis.length > 0) {
+                            const randomEmoji = matchingEmojis[Math.floor(Math.random() * matchingEmojis.length)];
+                            const re = new RegExp(`\\b${word}\\b`, 'gi');
+                            out = out.replace(re, randomEmoji);
+                        }
+                    }
+                }
+                
+                // Second pass: Replace single characters and symbols (?, !, <3, arrows, etc.)
+                // Build a map of all single-char/symbol keywords
+                const symbolMap = new Map();
+                for (const [emoji, keywords] of Object.entries(window.emojiKeywords)) {
+                    for (const keyword of keywords) {
+                        // Only consider symbols (non-word characters or very short patterns)
+                        // Exclude single digits since they're already handled by digitMap
+                        if (keyword.length <= 3 && !/^\w+$/.test(keyword) && !/^\d$/.test(keyword)) {
+                            if (!symbolMap.has(keyword)) {
+                                symbolMap.set(keyword, []);
+                            }
+                            symbolMap.get(keyword).push(emoji);
+                        }
+                    }
+                }
+                
+                // Replace symbols (longest first to handle multi-char like <3 before <)
+                const sortedSymbols = Array.from(symbolMap.keys()).sort((a, b) => b.length - a.length);
+                for (const symbol of sortedSymbols) {
+                    if (out.includes(symbol)) {
+                        const matchingEmojis = symbolMap.get(symbol);
+                        const randomEmoji = matchingEmojis[Math.floor(Math.random() * matchingEmojis.length)];
+                        // Escape special regex characters
+                        const escaped = symbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        out = out.replace(new RegExp(escaped, 'g'), randomEmoji);
+                    }
+                }
             }
             return out;
         },
@@ -2227,7 +2314,10 @@ const transforms = {
         },
         preview: function(text) {
             if (!text) return '[rev words]';
-            return this.func(text.split(/\s+/).slice(0,2).join(' ')) + '...';
+            // Take last 2-3 words and reverse them to show the effect
+            const words = text.split(/\s+/);
+            const lastWords = words.slice(-3).join(' ');
+            return this.func(lastWords) + '...';
         },
         reverse: function(text) {
             // Reversing words twice restores
