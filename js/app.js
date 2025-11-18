@@ -1878,6 +1878,62 @@ window.app = new Vue({
         },
 
         /**
+         * Toggle tooltip visibility on click
+         * @param {Event} event - The click event
+         */
+        toggleTooltip(event) {
+            event.stopPropagation();
+            
+            const icon = event.currentTarget;
+            const tooltipId = 'tooltip-' + Math.random().toString(36).substr(2, 9);
+            let tooltip = document.querySelector(`.custom-tooltip[data-for="${icon.dataset.tooltipId || tooltipId}"]`);
+            const isCurrentlyActive = tooltip && tooltip.classList.contains('active');
+            
+            // Close all tooltips first
+            document.querySelectorAll('.custom-tooltip.active').forEach(t => {
+                t.classList.remove('active');
+                setTimeout(() => {
+                    if (!t.classList.contains('active')) {
+                        t.remove();
+                    }
+                }, 200);
+            });
+            
+            // If this tooltip wasn't active, open it
+            if (!isCurrentlyActive) {
+                const tooltipText = icon.getAttribute('data-tooltip');
+                if (tooltipText) {
+                    // Store tooltip ID on icon for future reference
+                    if (!icon.dataset.tooltipId) {
+                        icon.dataset.tooltipId = tooltipId;
+                    }
+                    
+                    // Create tooltip and append to body for better positioning
+                    tooltip = document.createElement('div');
+                    tooltip.className = 'custom-tooltip';
+                    tooltip.textContent = tooltipText;
+                    tooltip.setAttribute('data-for', icon.dataset.tooltipId);
+                    document.body.appendChild(tooltip);
+                    
+                    // Position the tooltip relative to the icon
+                    const iconRect = icon.getBoundingClientRect();
+                    tooltip.style.position = 'fixed';
+                    tooltip.style.left = (iconRect.left + iconRect.width / 2) + 'px';
+                    tooltip.style.top = (iconRect.top - 8) + 'px';
+                    tooltip.style.transform = 'translate(-50%, -100%)';
+                    
+                    // Force reflow to ensure transition works
+                    void tooltip.offsetHeight;
+                    
+                    // Use setTimeout to ensure the element is in the DOM before adding active class
+                    setTimeout(() => {
+                        tooltip.classList.add('active');
+                    }, 10);
+                }
+            }
+        },
+
+        /**
          * Handle transform change - auto-add next dropdown or collapse consecutive Nones
          * @param {number} index - The index of the transformation that changed
          */
@@ -2588,6 +2644,22 @@ window.app = new Vue({
         if (this.isDarkTheme) {
             document.body.classList.add('dark-theme');
         }
+        
+        // Close tooltips when clicking outside
+        document.addEventListener('click', (e) => {
+            // Only close if not clicking on a tooltip icon
+            if (!e.target.closest('.tooltip-icon')) {
+                document.querySelectorAll('.custom-tooltip.active').forEach(tooltip => {
+                    tooltip.classList.remove('active');
+                    // Remove tooltip from DOM after transition
+                    setTimeout(() => {
+                        if (!tooltip.classList.contains('active')) {
+                            tooltip.remove();
+                        }
+                    }, 200);
+                });
+            }
+        });
         
         // Initialize category navigation
         this.initializeCategoryNavigation();

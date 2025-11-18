@@ -247,23 +247,30 @@ const transforms = {
         name: 'Base64',
         func: function(text) {
             try {
-                return btoa(text);
+                // Always use UTF-8 encoding for proper Unicode support
+                const utf8Bytes = unescape(encodeURIComponent(text));
+                return btoa(utf8Bytes);
             } catch (e) {
+                console.error('Base64 encode error:', e);
                 return '[Invalid input]';
             }
         },
         preview: function(text) {
             if (!text) return '[base64]';
             try {
-                return btoa(text.slice(0, 3)) + '...';
+                const utf8Bytes = unescape(encodeURIComponent(text.slice(0, 3)));
+                return btoa(utf8Bytes) + '...';
             } catch (e) {
                 return '[Invalid input]';
             }
         },
         reverse: function(text) {
             try {
-                return atob(text);
+                // Decode base64, then convert UTF-8 bytes back to string
+                const utf8Bytes = atob(text);
+                return decodeURIComponent(escape(utf8Bytes));
             } catch (e) {
+                console.error('Base64 decode error:', e);
                 return text;
             }
         }
@@ -299,48 +306,17 @@ const transforms = {
         }
     },
     
-    base64_utf8: {
-        name: 'Base64 UTF-8',
-        func: function(text) {
-            try {
-                // Handle Unicode properly by encoding to UTF-8 first
-                // Convert string to UTF-8 bytes, then encode to base64
-                const utf8Bytes = unescape(encodeURIComponent(text));
-                return btoa(utf8Bytes);
-            } catch (e) {
-                console.error('Base64 UTF-8 encode error:', e);
-                return '[Invalid input]';
-            }
-        },
-        preview: function(text) {
-            if (!text) return '[base64 utf8]';
-            try {
-                const utf8Bytes = unescape(encodeURIComponent(text.slice(0, 3)));
-                return btoa(utf8Bytes) + '...';
-            } catch (e) {
-                return '[Invalid input]';
-            }
-        },
-        reverse: function(text) {
-            try {
-                // Decode base64, then convert UTF-8 bytes back to string
-                const utf8Bytes = atob(text);
-                return decodeURIComponent(escape(utf8Bytes));
-            } catch (e) {
-                console.error('Base64 UTF-8 decode error:', e);
-                return text;
-            }
-        }
-    },
-    
     base64url: {
         name: 'Base64 URL',
         func: function(text) {
             if (!text) return '';
             try {
-                const std = btoa(text);
+                // Always use UTF-8 encoding for proper Unicode support
+                const utf8Bytes = unescape(encodeURIComponent(text));
+                const std = btoa(utf8Bytes);
                 return std.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/,'');
             } catch (e) {
+                console.error('Base64 URL encode error:', e);
                 return '[Invalid input]';
             }
         },
@@ -353,7 +329,14 @@ const transforms = {
             let std = text.replace(/-/g, '+').replace(/_/g, '/');
             // pad
             while (std.length % 4 !== 0) std += '=';
-            try { return atob(std); } catch (e) { return text; }
+            try {
+                // Decode base64, then convert UTF-8 bytes back to string
+                const utf8Bytes = atob(std);
+                return decodeURIComponent(escape(utf8Bytes));
+            } catch (e) {
+                console.error('Base64 URL decode error:', e);
+                return text;
+            }
         }
     },
     

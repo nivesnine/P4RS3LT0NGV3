@@ -378,7 +378,10 @@
                 <div class="transform-layout">
                     <div class="input-section">
                         <div class="section-header">
-                            <h3><i class="fas fa-layer-group"></i> Tokenizer Visualization <small>{{ tokenizerEngine }}</small></h3>
+                            <div class="section-title">
+                                <h3><i class="fas fa-layer-group"></i> Tokenizer Visualization</h3>
+                                <small>{{ tokenizerEngine }}</small>
+                            </div>
                             <p>Paste text to see how different tokenizers segment it.</p>
                         </div>
                         <div class="options-grid" style="margin-bottom:8px;">
@@ -428,10 +431,10 @@
                 <div class="transform-layout">
                     <div class="token-bomb-section">
                         <div class="section-header">
-                            <h3>
-                                <span title="High-density token payload builder">💥 Tokenade Generator</span>
+                            <div class="section-title">
+                                <h3><span title="High-density token payload builder">💥 Tokenade Generator</span></h3>
                                 <small>Craft dense token payloads with emojis and zero-width characters</small>
-                            </h3>
+                            </div>
                         </div>
                         <div class="tokenade-disclaimer" v-if="estimateTokenadeTokens() <= dangerThresholdTokens">
                             <i class="fas fa-triangle-exclamation"></i>
@@ -452,12 +455,12 @@
                             <button class="transform-button" title="Extreme density (use with care)" @click="applyTokenadePreset('super')">⚓ Super Heavyweight</button>
                         </div>
                         <div class="token-bomb-controls options-grid hacker-controls">
-                            <label class="slider-block" title="Nesting levels; higher = more layers of grouping">
+                            <label class="slider-block" title="Nesting levels; higher = more layers of grouping. Tip: Increasing depth/breadth grows size multiplicatively.">
                                 Depth (nesting)
                                 <input class="hacker-slider" type="range" v-model.number="tbDepth" min="1" max="8" />
                                 <span class="slider-value">{{ tbDepth }}</span>
                             </label>
-                            <label class="slider-block" title="How many items per level; higher = wider structure">
+                            <label class="slider-block" title="How many items per level; higher = wider structure. Tip: Increasing depth/breadth grows size multiplicatively.">
                                 Breadth per level
                                 <input class="hacker-slider" type="range" v-model.number="tbBreadth" min="1" max="10" />
                                 <span class="slider-value">{{ tbBreadth }}</span>
@@ -498,24 +501,29 @@
                         <div class="tokenade-carrier-options options-grid">
                             <div class="carrier-quick-grid" v-if="tbSingleCarrier">
                                 <small>Quick picks</small>
-                                <div class="emoji-grid" style="grid-template-columns: repeat(10, 32px); grid-auto-rows: 32px; gap: 6px;">
+                                <div class="emoji-grid">
                                     <button class="emoji-button" v-for="em in quickCarrierEmojis" :key="'q-'+em" @click="tbCarrier = em" :title="'Use '+em">{{ em }}</button>
                                 </div>
                             </div>
-                            <label title="Condense payload into a single emoji carrier">
-                                Single emoji carrier mode
+                            <label class="switch neon" title="Condense payload into a single emoji carrier">
                                 <input type="checkbox" v-model="tbSingleCarrier" />
+                                <span>Single emoji carrier mode</span>
                             </label>
-                            <label v-if="tbSingleCarrier" title="Choose the carrier emoji (quick list)">
-                                Carrier
+                            <label v-if="tbSingleCarrier">
+                                <span class="label-with-tooltip">
+                                    Carrier
+                                    <i class="fas fa-info-circle tooltip-icon" data-tooltip="Choose the carrier emoji (quick list)" @click="toggleTooltip"></i>
+                                </span>
                                 <select v-model="tbCarrier" @focus="setCarrierFromSelected">
                                     <option v-for="(em, index) in carrierEmojiList" :key="'carrier-'+index" :value="em">{{ em }}</option>
                                 </select>
                             </label>
-                            <label v-if="tbSingleCarrier" title="Advanced: use this symbol or string as the embedded payload for encoding">
-                                Advanced: custom carrier text
+                            <label v-if="tbSingleCarrier">
+                                <span class="label-with-tooltip">
+                                    Advanced: custom carrier text
+                                    <i class="fas fa-info-circle tooltip-icon" data-tooltip="When set, this overrides quick picks and dropdown." @click="toggleTooltip"></i>
+                                </span>
                                 <input type="text" v-model="tbCarrierManual" placeholder="e.g., ⚙️ or ::tag::" />
-                                <small>When set, this overrides quick picks and dropdown.</small>
                             </label>
                         </div>
                         <div class="token-bomb-actions">
@@ -527,7 +535,7 @@
                             </button>
                             <div class="output-instructions" v-if="tokenBombOutput">
                                 <small>
-                                    Length: {{ tokenBombOutput.length.toLocaleString() }} chars · Tip: Increasing depth/breadth grows size <em>multiplicatively</em>.
+                                    Length: {{ tokenBombOutput.length.toLocaleString() }} chars
                                 </small>
                             </div>
                         </div>
@@ -548,13 +556,13 @@
                                 Repeat count
                                 <input type="number" v-model.number="tpRepeat" min="1" max="1000" />
                             </label>
-                            <label>
-                                Add combining marks
+                            <label class="switch neon">
                                 <input type="checkbox" v-model="tpCombining" />
+                                <span>Add combining marks</span>
                             </label>
-                            <label>
-                                Add zero-width spacing
+                            <label class="switch neon">
                                 <input type="checkbox" v-model="tpZW" />
+                                <span>Add zero-width spacing</span>
                             </label>
                         </div>
                         <div class="token-bomb-actions">
@@ -577,7 +585,10 @@
                 <div class="transform-layout">
                     <div class="transform-section">
                         <div class="section-header">
-                            <h3><i class="fas fa-bug"></i> Mutation Lab <small>mutate text into diverse payloads</small></h3>
+                            <div class="section-title">
+                                <h3><i class="fas fa-bug"></i> Mutation Lab</h3>
+                                <small>mutate text into diverse payloads</small>
+                            </div>
                         </div>
                         <div class="options-grid">
                             <label style="grid-column: 1 / -1;">
@@ -1014,7 +1025,10 @@
                 <div class="transform-layout">
                     <div class="transform-section">
                         <div class="section-header">
-                            <h3><i class="fas fa-grip-lines"></i> Message Splitter <small>split text into multiple copyable chunks</small></h3>
+                            <div class="section-title">
+                                <h3><i class="fas fa-grip-lines"></i> Message Splitter</h3>
+                                <small>split text into multiple copyable chunks</small>
+                            </div>
                             <p>Enter text to split into multiple messages. Each message can be transformed and encapsulated individually.</p>
                         </div>
                         
@@ -1055,14 +1069,14 @@
                             <label v-if="splitterMode === 'word'">
                                 <span class="label-with-tooltip">
                                     Skip Words Between Splits
-                                    <i class="fas fa-info-circle tooltip-icon" title="0 = split every word, 1 = skip 1 word between splits, etc."></i>
+                                    <i class="fas fa-info-circle tooltip-icon" data-tooltip="0 = split every word, 1 = skip 1 word between splits, etc." @click="toggleTooltip"></i>
                                 </span>
                                 <input type="number" v-model.number="splitterWordSkip" min="0" max="20" />
                             </label>
                             <label v-if="splitterMode === 'word'">
                                 <span class="label-with-tooltip">
                                     Min Word Length to Split
-                                    <i class="fas fa-info-circle tooltip-icon" title="Ignore words shorter than this (default: 2)"></i>
+                                    <i class="fas fa-info-circle tooltip-icon" data-tooltip="Ignore words shorter than this (default: 2)" @click="toggleTooltip"></i>
                                 </span>
                                 <input type="number" v-model.number="splitterMinWordLength" min="1" max="20" />
                             </label>
@@ -1255,10 +1269,9 @@
                     </select>
                 </label>
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <button class="apply-steg-options" :class="{ applied: unicodeApplyFlash }" :disabled="unicodeApplyBusy" @click="applyUnicodeOptions">Apply</button>
+                    <button class="apply-steg-options" :class="{ applied: unicodeApplyFlash }" :disabled="unicodeApplyBusy" @click="applyUnicodeOptions" title="These options affect Unicode-based steganography encoding/decoding.">Apply</button>
                     <small v-if="unicodeApplyFlash" class="apply-status">Applied</small>
                 </div>
-                <small class="steg-note">These options affect Unicode-based steganography encoding/decoding.</small>
             </div>
         </div>
 

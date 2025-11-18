@@ -258,6 +258,31 @@ h1, h2, h3, h4, h5 {
     margin-bottom: 15px;
 }
 
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.section-title h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-color);
+    margin: 0;
+}
+
+.section-title small {
+    font-size: 0.85em;
+    font-weight: normal;
+    color: var(--text-muted);
+    background-color: rgba(100, 181, 246, 0.1);
+    padding: 4px 10px;
+    border-radius: 4px;
+}
+
 .section-header h3 {
     display: flex;
     align-items: center;
@@ -1768,6 +1793,21 @@ button:hover {
         width: 100%;
         text-align: left;
     }
+    
+    .section-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .section-title h3 {
+        width: 100%;
+    }
+    
+    .section-title small {
+        width: 100%;
+        text-align: left;
+    }
 }
 
 /* Special styling for randomizer section */
@@ -2126,11 +2166,16 @@ html {
     border-radius: 8px;
     padding: 10px;
     margin-bottom: 8px;
+    grid-column: 1 / -1; /* Span full width of the grid */
+    width: 100%;
 }
 .carrier-quick-grid .emoji-grid { 
     border: none !important; 
     background: transparent !important; 
-    padding: 6px !important; 
+    padding: 6px !important;
+    grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)) !important;
+    grid-auto-rows: 32px !important;
+    width: 100% !important;
 }
 .tokenade-carrier-options { margin-top: 8px; }
 .carrier-quick-grid .emoji-button { 
@@ -2374,14 +2419,68 @@ html {
 .tooltip-icon {
     color: var(--text-muted);
     font-size: 0.85rem;
-    cursor: help;
+    cursor: pointer;
     opacity: 0.7;
     transition: opacity 0.2s ease, color 0.2s ease;
+    position: relative;
+    display: inline-block;
+    margin-left: 4px;
+    z-index: 999;
 }
 
 .tooltip-icon:hover {
     opacity: 1;
     color: var(--accent-color);
+    z-index: 999;
+}
+
+.tooltip-icon:active {
+    transform: scale(0.95);
+}
+
+/* Custom click-based tooltip */
+.custom-tooltip {
+    position: fixed;
+    padding: 8px 12px;
+    background: rgba(20, 20, 25, 0.98);
+    color: #fff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    border-radius: 6px;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    max-width: 280px;
+    min-width: 200px;
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(100, 181, 246, 0.2);
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.custom-tooltip::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(20, 20, 25, 0.98);
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+}
+
+.custom-tooltip.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Position tooltip icons properly */
+.tooltip-icon[data-tooltip] {
+    position: relative;
 }
 
 .options-grid input[type="number"],
@@ -2532,5 +2631,28 @@ html {
     .preset-btn {
         padding: 5px 10px;
         font-size: 0.85rem;
+    }
+    
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .transform-chain-inline {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .transform-arrow {
+        transform: rotate(90deg);
+        margin: 4px 0;
+    }
+    
+    .splitter-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .splitter-actions button {
+        width: 100%;
     }
 }
