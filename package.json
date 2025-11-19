@@ -1,1 +1,21 @@
-{}
+{
+  "name": "p4rs3lt0ngv3",
+  "version": "1.0.0",
+  "description": "Universal Text Encoder/Decoder & Steganography Tool",
+  "scripts": {
+    "build": "node build/build-transforms.js",
+    "build:emoji": "node build/build-emoji-data.js",
+    "build:all": "npm run build:emoji && npm run build",
+    "test": "node tests/test_universal.js",
+    "test:universal": "node tests/test_universal.js",
+    "test:steg": "node tests/test_steganography_options.js",
+    "precommit": "npm run test:universal"
+  },
+  "repository": {
+    "type": "git",
+    "url": "."
+  },
+  "keywords": ["encoder", "decoder", "steganography", "cipher"],
+  "author": "",
+  "license": "MIT"
+}

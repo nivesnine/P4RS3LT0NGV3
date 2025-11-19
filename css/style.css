@@ -3273,3 +3273,62 @@ html {
         width: 100%;
     }
 }
+
+/* Universal Decoder - Alternatives Section */
+.alternatives-section {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.alternatives-header {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.alternatives-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.alternative-item {
+    padding: 0.75rem;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.alternative-method {
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.alternative-preview {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.input-header, .output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.input-header label, .output-header label {
+    font-weight: 500;
+    color: var(--text-color);
+}

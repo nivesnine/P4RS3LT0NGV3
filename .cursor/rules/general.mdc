@@ -1,0 +1,51 @@
+---
+alwaysApply: true
+---
+
+## Code Organization
+- Place code in correct directories: `js/core/` (shared logic), `js/tools/` (UI features), `js/utils/` (helpers), `src/transformers/` (transform logic)
+- Extract utilities to `js/utils/` when reused
+- Use `js/config/constants.js` for magic numbers (UPPER_SNAKE_CASE)
+
+## Security
+- Never use `eval()` - use `window.EscapeParser.parseEscapeSequence()` instead
+- Validate and sanitize user inputs
+- Avoid exposing sensitive data in logs/frontend
+
+## Code Style
+- Use ES6+ (arrow functions, const/let, template literals)
+- Add JSDoc comments for public functions
+- Follow existing file naming: `camelCase.js` for tools/utils, `kebab-case.js` for transformers
+- Classes: `PascalCase`, Functions: `camelCase`, Constants: `UPPER_SNAKE_CASE`
+
+## Transformers
+- Inherit from `BaseTransformer.js`
+- Place in appropriate category directory (`ciphers/`, `base-encodings/`, etc.)
+- Run `npm run build` after changes
+- Update tests in `tests/test_universal.js`
+- Update documentation if needed
+
+## Tools (UI Features)
+- Extend `Tool` base class from `js/tools/Tool.js`
+- Register in `js/tools/index.js`
+- Add script tag to `index.html` before `app.js`
+- Keep Vue data/methods/template in tool class
+
+## Testing & Build
+- Run `npm test` before submitting
+- Run `npm run build` after transformer changes
+- Test in browser (open `index.html`)
+- Ensure no console errors
+
+## Documentation
+- Update relevant docs when adding features
+- Add JSDoc for new public functions
+- Update `CONTRIBUTING.md` if adding new patterns
+
+## Before Submitting
+- [ ] Code follows existing style
+- [ ] Tests pass
+- [ ] Build succeeds
+- [ ] Tested in browser
+- [ ] No console errors
+- [ ] Documentation updated

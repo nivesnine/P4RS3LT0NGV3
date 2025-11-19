@@ -57,40 +57,15 @@
 
         <div class="tabs">
             <div class="tab-buttons">
+                <!-- Dynamically generated tab buttons from tool registry -->
                 <button 
-                    :class="{ active: activeTab === 'transforms' }" 
-                    @click="switchToTab('transforms')"
-                    title="Transform text (T)"
+                    v-for="tool in registeredTools"
+                    :key="tool.id"
+                    :class="{ active: activeTab === tool.id }" 
+                    @click="switchToTab(tool.id)"
+                    :title="tool.title"
                 >
-                    <i class="fas fa-font"></i> Transform
-                </button>
-                <button 
-                    :class="{ active: activeTab === 'steganography' }" 
-                    @click="switchToTab('steganography')"
-                    title="Hide text in emojis (H)"
-                >
-                    <i class="fas fa-smile"></i> Emoji
-                </button>
-                <button 
-                    :class="{ active: activeTab === 'tokenade' }" 
-                    @click="switchToTab('tokenade')"
-                    title="Tokenade Generator"
-                >
-                    <i class="fas fa-bomb"></i> Tokenade
-                </button>
-                <button 
-                    :class="{ active: activeTab === 'fuzzer' }" 
-                    @click="switchToTab('fuzzer')"
-                    title="Generate many mutated payloads for testing"
-                >
-                    <i class="fas fa-bug"></i> Mutation Lab
-                </button>
-                <button 
-                    :class="{ active: activeTab === 'tokenizer' }" 
-                    @click="switchToTab('tokenizer')"
-                    title="Tokenizer visualization"
-                >
-                    <i class="fas fa-layer-group"></i> Tokenizer
+                    <i :class="'fas ' + tool.icon"></i> {{ tool.name }}
                 </button>
                 <button
                     :class="{ active: activeTab === 'gibberish' }"
@@ -106,6 +81,73 @@
                 >
                     <i class="fas fa-grip-lines"></i> Splitter
                 </button>
+            </div>
+
+            <!-- Universal Decoder Tab -->
+            <div v-if="activeTab === 'decoder'" class="tab-content">
+                <div class="transform-layout">
+                    <div class="input-section">
+                        <div class="input-header">
+                            <label for="decoder-input">Paste any encoded text to decode</label>
+                            <select v-model="selectedDecoder" @change="runUniversalDecode" style="margin-left: 15px; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--input-border); background: var(--button-bg); color: var(--text);">
+                                <option value="auto">🔍 Auto-detect</option>
+                                <option v-for="transform in getAllTransformsWithReverse()" :key="transform.name" :value="transform.name">
+                                    {{ transform.name }}
+                                </option>
+                            </select>
+                        </div>
+                        <textarea 
+                            id="decoder-input" 
+                            v-model="decoderInput" 
+                            placeholder="Paste any encoded text here... (Base64, Morse code, Binary, Braille, etc.)"
+                            @input="runUniversalDecode"
+                        ></textarea>
+                    </div>
+                    
+                    <div class="output-section">
+                        <div class="output-header">
+                            <label>
+                                <span v-if="decoderResult && decoderResult.method">
+                                    Decoded using: <strong>{{ decoderResult.method }}</strong>
+                                </span>
+                                <span v-else>
+                                    Decoded Output
+                                </span>
+                            </label>
+                            <button 
+                                v-if="decoderOutput" 
+                                @click="copyToClipboard(decoderOutput)" 
+                                class="copy-button"
+                                title="Copy to clipboard"
+                            >
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <textarea 
+                            id="decoder-output" 
+                            :value="decoderOutput" 
+                            readonly
+                            placeholder="Decoded text will appear here..."
+                        ></textarea>
+                        
+                        <!-- Alternatives section -->
+                        <div v-if="decoderResult && decoderResult.alternatives && decoderResult.alternatives.length > 0" class="alternatives-section">
+                            <div class="alternatives-header">
+                                <i class="fas fa-list"></i> {{ decoderResult.alternatives.length }} Alternative{{ decoderResult.alternatives.length > 1 ? 's' : '' }}:
+                            </div>
+                            <div class="alternatives-list">
+                                <div 
+                                    v-for="(alt, index) in decoderResult.alternatives" 
+                                    :key="index" 
+                                    class="alternative-item"
+                                >
+                                    <div class="alternative-method">{{ alt.method }}</div>
+                                    <div class="alternative-preview">{{ alt.text.substring(0, 100) }}{{ alt.text.length > 100 ? '...' : '' }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Steganography Tab -->
@@ -167,45 +209,6 @@
                         </div>
                         <div class="output-instructions">
                             <small><i class="fas fa-info-circle"></i> Copy this text and share it. Only people who know how to decode it will be able to read your message.</small>
-                        </div>
-                    </div>
-
-                    
-                    <!-- Universal Decoder Section for Steganography Tab -->
-                    <div class="decode-section">
-                        <div class="section-header">
-                            <h3>
-                                <i class="fas fa-magic"></i> Universal Decoder
-                                <small v-if="activeTransform">(Prioritizing {{ activeTransform.name }})</small>
-                            </h3>
-                            <p v-if="activeTransform && transformHasReverse(activeTransform)">
-                                Paste encoded text to decode with {{ activeTransform.name }} or try other methods
-                            </p>
-                            <p v-else>Paste any encoded text to try all decoding methods at once</p>
-                        </div>
-                        
-                        <div class="input-container">
-                            <textarea 
-                                id="universal-decode-input-steg" 
-                                v-model="universalDecodeInput" 
-                                placeholder="Paste encoded text to decode automatically..."
-                                @input="runUniversalDecode"
-                            ></textarea>
-                            <div class="decoded-message" v-if="universalDecodeResult">
-                                <div class="decode-method">
-                                    <span>Decoded using: <strong>{{ universalDecodeResult.method }}</strong></span>
-                                    <span v-if="activeTransform && universalDecodeResult.method === activeTransform.name" class="decode-priority">(Priority Match)</span>
-                                </div>
-                                <div class="decode-result">{{ universalDecodeResult.text }}</div>
-                                <div class="decode-actions">
-                                    <button class="copy-button" @click="copyToClipboard(universalDecodeResult.text)" title="Copy decoded text">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                    <button class="use-as-input-button" v-if="universalDecodeResult.text" @click="transformInput = universalDecodeResult.text" title="Use this as input for transforms">
-                                        <i class="fas fa-arrow-up"></i> Use as Input
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -683,14 +686,6 @@
                                             </small>
                                             <i class="fas fa-copy auto-copy-icon"></i>
                                         </button>
-                                        <button 
-                                            v-if="transformHasReverse(transform)"
-                                            @click="decodeWithTransform(transform)"
-                                            class="decode-button transform-category-encoding"
-                                            :title="'Click to decode using: ' + transform.name"
-                                        >
-                                            <i class="fas fa-undo"></i>
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -711,14 +706,6 @@
                                                 {{ transform.preview(transformInput.slice(0, 10)) }}
                                             </small>
                                             <i class="fas fa-copy auto-copy-icon"></i>
-                                        </button>
-                                        <button 
-                                            v-if="transformHasReverse(transform)"
-                                            @click="decodeWithTransform(transform)"
-                                            class="decode-button transform-category-cipher"
-                                            :title="'Click to decode using: ' + transform.name"
-                                        >
-                                            <i class="fas fa-undo"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -741,14 +728,6 @@
                                             </small>
                                             <i class="fas fa-copy auto-copy-icon"></i>
                                         </button>
-                                        <button 
-                                            v-if="transformHasReverse(transform)"
-                                            @click="decodeWithTransform(transform)"
-                                            class="decode-button transform-category-visual"
-                                            :title="'Click to decode using: ' + transform.name"
-                                        >
-                                            <i class="fas fa-undo"></i>
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -769,14 +748,6 @@
                                                 {{ transform.preview(transformInput.slice(0, 10)) }}
                                             </small>
                                             <i class="fas fa-copy auto-copy-icon"></i>
-                                        </button>
-                                        <button 
-                                            v-if="transformHasReverse(transform)"
-                                            @click="decodeWithTransform(transform)"
-                                            class="decode-button transform-category-format"
-                                            :title="'Click to decode using: ' + transform.name"
-                                        >
-                                            <i class="fas fa-undo"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -799,14 +770,6 @@
                                             </small>
                                             <i class="fas fa-copy auto-copy-icon"></i>
                                         </button>
-                                        <button 
-                                            v-if="transformHasReverse(transform)"
-                                            @click="decodeWithTransform(transform)"
-                                            class="decode-button transform-category-unicode"
-                                            :title="'Click to decode using: ' + transform.name"
-                                        >
-                                            <i class="fas fa-undo"></i>
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -827,14 +790,6 @@
                                                 {{ transform.preview(transformInput.slice(0, 10)) }}
                                             </small>
                                             <i class="fas fa-copy auto-copy-icon"></i>
-                                        </button>
-                                        <button 
-                                            v-if="transformHasReverse(transform)"
-                                            @click="decodeWithTransform(transform)"
-                                            class="decode-button transform-category-special"
-                                            :title="'Click to decode using: ' + transform.name"
-                                        >
-                                            <i class="fas fa-undo"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -857,14 +812,6 @@
                                             </small>
                                             <i class="fas fa-copy auto-copy-icon"></i>
                                         </button>
-                                        <button 
-                                            v-if="transformHasReverse(transform)"
-                                            @click="decodeWithTransform(transform)"
-                                            class="decode-button transform-category-fantasy"
-                                            :title="'Click to decode using: ' + transform.name"
-                                        >
-                                            <i class="fas fa-undo"></i>
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -886,14 +833,6 @@
                                             </small>
                                             <i class="fas fa-copy auto-copy-icon"></i>
                                         </button>
-                                        <button 
-                                            v-if="transformHasReverse(transform)"
-                                            @click="decodeWithTransform(transform)"
-                                            class="decode-button transform-category-ancient"
-                                            :title="'Click to decode using: ' + transform.name"
-                                        >
-                                            <i class="fas fa-undo"></i>
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -914,14 +853,6 @@
                                                 {{ transform.preview(transformInput.slice(0, 10)) }}
                                             </small>
                                             <i class="fas fa-copy auto-copy-icon"></i>
-                                        </button>
-                                        <button 
-                                            v-if="transformHasReverse(transform)"
-                                            @click="decodeWithTransform(transform)"
-                                            class="decode-button transform-category-technical"
-                                            :title="'Click to decode using: ' + transform.name"
-                                        >
-                                            <i class="fas fa-undo"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -984,44 +915,7 @@
                             </button>
                         </div>
                         <div class="output-instructions">
-                            <small><i class="fas fa-info-circle"></i> Copy this text and share it. The transformation can be reversed using the Universal Decoder below.</small>
-                        </div>
-                    </div>
-
-                    <!-- Universal Decoder Section for Transforms Tab -->
-                    <div class="decode-section">
-                        <div class="section-header">
-                            <h3>
-                                <i class="fas fa-magic"></i> Universal Decoder
-                                <small v-if="activeTransform">(Prioritizing {{ activeTransform.name }})</small>
-                            </h3>
-                            <p v-if="activeTransform && transformHasReverse(activeTransform)">
-                                Paste encoded text to decode with {{ activeTransform.name }} or try other methods
-                            </p>
-                            <p v-else>Paste any encoded text to try all decoding methods at once</p>
-                        </div>
-                        <div class="input-container">
-                            <textarea 
-                                id="universal-decode-input-transforms" 
-                                v-model="universalDecodeInput" 
-                                placeholder="Paste encoded text to decode automatically..."
-                                @input="runUniversalDecode"
-                            ></textarea>
-                            <div class="decoded-message" v-if="universalDecodeResult">
-                                <div class="decode-method">
-                                    <span>Decoded using: <strong>{{ universalDecodeResult.method }}</strong></span>
-                                    <span v-if="activeTransform && universalDecodeResult.method === activeTransform.name" class="decode-priority">(Priority Match)</span>
-                                </div>
-                                <div class="decode-result">{{ universalDecodeResult.text }}</div>
-                                <div class="decode-actions">
-                                    <button class="copy-button" @click="copyToClipboard(universalDecodeResult.text)" title="Copy decoded text">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                    <button class="use-as-input-button" v-if="universalDecodeResult.text" @click="transformInput = universalDecodeResult.text" title="Use this as input for transforms">
-                                        <i class="fas fa-arrow-up"></i> Use as Input
-                                    </button>
-                                </div>
-                            </div>
+                            <small><i class="fas fa-info-circle"></i> Copy this text and share it. Use the Decoder tab to decode it later.</small>
                         </div>
                     </div>
                 </div>
@@ -1286,10 +1180,36 @@
     <!-- End of #app div -->
 
     <!-- Load JavaScript files after Vue template -->
-    <script src="js/emojiWordMap.js"></script>
-    <script src="js/transforms.js"></script>
-    <script src="js/steganography.js"></script>
-    <script src="js/emojiLibrary.js"></script>
+    <!-- Data files (generated/static data) -->
+    <script src="js/data/emojiData.js"></script>
+    <script src="js/data/emojiCompatibility.js"></script>
+    
+    <!-- Generated bundles -->
+    <script src="js/bundles/transforms-bundle.js"></script>
+    
+    <!-- Load Configuration and Utilities (before modules that depend on them) -->
+    <script src="js/config/constants.js"></script>
+    <script src="js/utils/escapeParser.js"></script>
+    <script src="js/utils/focus.js"></script>
+    <script src="js/utils/notifications.js"></script>
+    <script src="js/utils/history.js"></script>
+    <script src="js/utils/theme.js"></script>
+    
+    <!-- Core modules (feature libraries) -->
+    <script src="js/core/steganography.js"></script>
+    <script src="js/core/decoder.js"></script>
+    <script src="js/core/emojiLibrary.js"></script>
+    
+    <!-- Load Tool System -->
+    <script src="js/tools/Tool.js"></script>
+    <script src="js/tools/TransformTool.js"></script>
+    <script src="js/tools/DecodeTool.js"></script>
+    <script src="js/tools/EmojiTool.js"></script>
+    <script src="js/tools/TokenadeTool.js"></script>
+    <script src="js/tools/MutationTool.js"></script>
+    <script src="js/tools/TokenizerTool.js"></script>
+    <script src="js/tools/index.js"></script>
+    
     <script src="js/app.js"></script>
     
     <!-- Force emoji grid rendering -->
@@ -1325,46 +1245,14 @@
             }, true);
         })();
 
-        // Wire up advanced steg options to steganography engine
-        document.addEventListener('DOMContentLoaded', function(){
-            document.querySelectorAll('.apply-steg-options').forEach(btn => {
-                btn.addEventListener('click', function(e){
-                    e.preventDefault();
-                    const panel = btn.closest('.steg-adv-panel');
-                    if (!panel) return;
-                    const initSel = panel.querySelector('.steg-initial-presentation')?.value || 'emoji';
-                    const vs0 = panel.querySelector('.steg-vs-zero')?.value || '\\ufe0e';
-                    const vs1 = panel.querySelector('.steg-vs-one')?.value || '\\ufe0f';
-                    const inter = panel.querySelector('.steg-inter-zw')?.value || null;
-                    const trailing = panel.querySelector('.steg-trailing-zw')?.value || null;
-                    const every = parseInt(panel.querySelector('.steg-inter-every')?.value || '1', 10);
-                    const order = panel.querySelector('.steg-bit-order')?.value || 'msb';
-                    if (window.steganography && window.steganography.setStegOptions) {
-                        window.steganography.setStegOptions({
-                            initialPresentation: initSel,
-                            bitZeroVS: vs0,
-                            bitOneVS: vs1,
-                            interBitZW: inter,
-                            interBitEvery: isNaN(every) ? 1 : Math.max(1, Math.min(8, every)),
-                            trailingZW: trailing,
-                            bitOrder: order
-                        });
-                    }
-                });
-            });
-        });
-
         // Function to initialize emoji grid with retries
         function initEmojiGrid(retryCount) {
             retryCount = retryCount || 0;
             const maxRetries = 5;
             
-            console.log('Initializing emoji grid, attempt:', retryCount + 1);
-            
             // Check if we're on the steganography tab before trying to initialize
             const app = document.getElementById('app').__vue__;
             if (!app || app.activeTab !== 'steganography') {
-                console.log('Not on steganography tab, skipping emoji grid initialization');
                 return;
             }
             
@@ -1374,7 +1262,6 @@
             // Access the emoji grid container without forcing styles
             const emojiGridContainer = document.getElementById('emoji-grid-container');
             if (emojiGridContainer) {
-                console.log('Found emoji grid container, initializing...');
                 // Only set content, let CSS handle display
                 emojiGridContainer.innerHTML = '<div class="loading-emojis">Loading emoji grid...</div>';
                 
@@ -1387,18 +1274,15 @@
                                 app.selectEmoji(emoji);
                             }
                         });
-                        console.log('Emoji grid successfully rendered');
                     } catch (error) {
                         console.error('Error rendering emoji grid:', error);
                     }
                 } else {
-                    console.warn('Emoji library not yet available, will retry');
                     if (retryCount < maxRetries) {
                         setTimeout(() => initEmojiGrid(retryCount + 1), 500);
                     }
                 }
             } else {
-                console.warn('Emoji grid container not found, will retry');
                 if (retryCount < maxRetries) {
                     setTimeout(() => initEmojiGrid(retryCount + 1), 500);
                 }
@@ -1416,7 +1300,6 @@
                 if (originalWatch) {
                     vue.$watch('activeTab', function(newTab) {
                         if (newTab === 'steganography') {
-                            console.log('Switched to steganography tab, initializing emoji grid');
                             setTimeout(initEmojiGrid, 100);
                         }
                     });

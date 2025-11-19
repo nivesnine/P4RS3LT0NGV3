@@ -77,7 +77,6 @@ A powerful web-based text transformation and steganography tool that can encode/
 - **Vaporwave** - Aesthetic spacing
 - **Zalgo** - Glitch text with combining marks
 - **Mirror Text** - Reversed text
-- **Rainbow Text** - Colorful text effects
 
 ### 🔍 **Universal Decoder**
 - **Smart Detection**: Automatically detects and decodes any supported format
@@ -166,56 +165,19 @@ streamlit run parsel_app.py
 
 ## 🤝 **Contributing**
 
-This project welcomes contributions! Areas for improvement:
+This project welcomes contributions! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for detailed guidelines.
 
+**Quick Start:**
+- **Adding a transformer?** See `src/transformers/README.md`
+- **Adding a new tool/feature?** See `CONTRIBUTING.md` → "Adding a New Tool"
+- **Adding utilities?** See `CONTRIBUTING.md` → "Adding a New Utility Function"
+
+**Areas for improvement:**
 - **New Languages**: Add more fictional or historical scripts
 - **Better Decoding**: Improve universal decoder accuracy
 - **Performance**: Optimize for very long texts
 - **Mobile**: Enhance mobile experience
 - **Accessibility**: Improve screen reader support
-
-### 🧩 How to add a new transform
-
-1) Define the transform in `js/transforms.js` inside the `transforms` object:
-
-```js
-new_transform_key: {
-    name: 'Human Friendly Name',
-    // Optional: map for character ↔ character transforms
-    map: { /* 'a': 'α', ... */ },
-    // Required: encoding function
-    func: function(text) { /* return transformed */ },
-    // Optional but recommended: short, readable preview
-    preview: function(text) { return this.func((text||'').slice(0, 3)) + '...'; },
-    // Optional: reverse/decoder (enables universal decoder to use it directly)
-    reverse: function(text) { /* return decoded */ }
-}
-```
-
-2) Add it to a category in `js/app.js` under `transformCategories` so it shows in the UI, e.g.:
-
-```js
-transformCategories: {
-  cipher: ['Caesar Cipher', 'ROT13', 'Your New Transform']
-}
-```
-
-3) If your transform uses a custom script or style (not simple ASCII substitutions), ensure the universal decoder can detect it. Add pattern detection or reverse mapping in `universalDecode` in `js/app.js`:
-
-```js
-// Example: add to a check list
-const customChecks = [{ name: 'Your New Transform', transform: 'your_key' }];
-// build reverse map and try decoding if the input contains your characters
-```
-
-4) If you want it considered by the Randomizer, add its key to `getRandomizableTransforms()` in `js/transforms.js`.
-
-5) Test it in `test_transforms.html`. Add a button and a simple test harness calling `testTransform('your_key')`.
-
-Tips:
-- Keep `preview()` short to avoid UI overflow.
-- Prefer providing `reverse()` so the universal decoder can decode it directly.
-- Unicode-heavy styles should provide a reverse map for accurate decoding.
 
 ## 📄 **License**
 
