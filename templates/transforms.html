@@ -14,7 +14,7 @@
                             <div class="legend-title">Categories:</div>
                             <div>
                                 <div 
-                                    v-for="category in categories" 
+                                    v-for="category in legendCategories" 
                                     :key="category"
                                     :class="'legend-item transform-category-' + category" 
                                     :data-target="'category-' + category"
@@ -24,7 +24,69 @@
                             </div>
                         </div>
                         <div class="transform-categories">
-                            <template v-for="category in categories" :key="category">
+                            <!-- Favorites Section -->
+                            <div 
+                                v-if="showFavorites && getFavoriteTransforms().length > 0"
+                                id="category-favorites"
+                                class="transform-category-section favorites-section"
+                            >
+                                <h4 class="category-title">
+                                    <i class="fas fa-star"></i> Favorites
+                                </h4>
+                                <div class="transform-buttons">
+                                    <div v-for="transform in getFavoriteTransforms()" :key="transform.name" class="transform-button-group">
+                                        <button 
+                                            @click="applyTransform(transform, $event)"
+                                            :class="'transform-button transform-category-' + getDisplayCategory(transform.name)"
+                                            :class="{ active: activeTransform === transform }"
+                                            :title="'Click to transform and copy: ' + transform.name"
+                                        >
+                                            {{ transform.name }}
+                                            <small class="transform-preview" v-if="transformInput">
+                                                {{ transform.preview(transformInput.slice(0, 10)) }}
+                                            </small>
+                                            <i 
+                                                @click.stop="toggleFavorite(transform.name, $event)"
+                                                :class="'fas fa-star favorite-icon' + (isFavorite(transform.name) ? ' favorited' : '')"
+                                                :title="isFavorite(transform.name) ? 'Remove from favorites' : 'Add to favorites'"
+                                            ></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Last Used Section -->
+                            <div 
+                                v-if="showLastUsed && getLastUsedTransforms().length > 0"
+                                id="category-last-used"
+                                class="transform-category-section last-used-section"
+                            >
+                                <h4 class="category-title">
+                                    <i class="fas fa-clock"></i> Last Used
+                                </h4>
+                                <div class="transform-buttons">
+                                    <div v-for="transform in getLastUsedTransforms()" :key="transform.name" class="transform-button-group">
+                                        <button 
+                                            @click="applyTransform(transform, $event)"
+                                            :class="'transform-button transform-category-' + getDisplayCategory(transform.name)"
+                                            :class="{ active: activeTransform === transform }"
+                                            :title="'Click to transform and copy: ' + transform.name"
+                                        >
+                                            {{ transform.name }}
+                                            <small class="transform-preview" v-if="transformInput">
+                                                {{ transform.preview(transformInput.slice(0, 10)) }}
+                                            </small>
+                                            <i 
+                                                @click.stop="toggleFavorite(transform.name, $event)"
+                                                :class="'fas fa-star favorite-icon' + (isFavorite(transform.name) ? ' favorited' : '')"
+                                                :title="isFavorite(transform.name) ? 'Remove from favorites' : 'Add to favorites'"
+                                            ></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <template v-for="(category, categoryIndex) in categories" :key="category">
                                 <!-- Special handling for randomizer category -->
                                 <div 
                                     v-if="isSpecialCategory(category)"
@@ -49,7 +111,11 @@
                                                 <small class="transform-preview">
                                                     🌀 Each word = different transform!
                                                 </small>
-                                                <i class="fas fa-copy auto-copy-icon"></i>
+                                                <i 
+                                                    @click.stop="toggleFavorite(transform.name, $event)"
+                                                    :class="'fas fa-star favorite-icon' + (isFavorite(transform.name) ? ' favorited' : '')"
+                                                    :title="isFavorite(transform.name) ? 'Remove from favorites' : 'Add to favorites'"
+                                                ></i>
                                             </button>
                                         </div>
                                     </div>
@@ -71,7 +137,27 @@
                                     :id="'category-' + category" 
                                     :class="'transform-category-section'"
                                 >
-                                    <h4 :class="'category-title transform-category-' + category">{{ category }}</h4>
+                                    <h4 :class="'category-title transform-category-' + category">
+                                        {{ category }}
+                                        <span class="category-order-controls">
+                                            <button 
+                                                v-if="categoryIndex > 0"
+                                                @click.stop="moveCategoryUp(categoryIndex)"
+                                                class="category-move-btn"
+                                                title="Move category up"
+                                            >
+                                                <i class="fas fa-arrow-up"></i>
+                                            </button>
+                                            <button 
+                                                v-if="categoryIndex < categories.length - 1"
+                                                @click.stop="moveCategoryDown(categoryIndex)"
+                                                class="category-move-btn"
+                                                title="Move category down"
+                                            >
+                                                <i class="fas fa-arrow-down"></i>
+                                            </button>
+                                        </span>
+                                    </h4>
                                     <div class="transform-buttons">
                                         <div v-for="transform in getTransformsByCategory(category)" :key="transform.name" class="transform-button-group">
                                             <button 
@@ -84,7 +170,11 @@
                                                 <small class="transform-preview" v-if="transformInput">
                                                     {{ transform.preview(transformInput.slice(0, 10)) }}
                                                 </small>
-                                                <i class="fas fa-copy auto-copy-icon"></i>
+                                                <i 
+                                                    @click.stop="toggleFavorite(transform.name, $event)"
+                                                    :class="'fas fa-star favorite-icon' + (isFavorite(transform.name) ? ' favorited' : '')"
+                                                    :title="isFavorite(transform.name) ? 'Remove from favorites' : 'Add to favorites'"
+                                                ></i>
                                             </button>
                                         </div>
                                     </div>
