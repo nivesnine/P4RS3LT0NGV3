@@ -106,7 +106,7 @@ A powerful web-based text transformation and steganography tool that can encode/
 
 ### **Quick Start (Built Version)**
 1. Run the build process (see Development Setup below)
-2. Open `index.html` in any modern web browser
+2. Open `dist/index.html` in any modern web browser
 3. Type text in the input field
 4. Choose a transformation from the categorized buttons
 5. Click any transform button to apply and auto-copy
@@ -118,15 +118,17 @@ A powerful web-based text transformation and steganography tool that can encode/
 npm install
 
 # Build all assets (required before use):
+# - Copies static files to dist/
 # - Builds transform bundle from source files
 # - Generates emoji data
-# - Injects tool templates into index.html
+# - Injects tool templates into dist/index.html
 npm run build
 
 # Or build individual components:
-npm run build:transforms  # Bundle all transformers
-npm run build:emoji        # Generate emoji data
-npm run build:templates    # Inject tool HTML templates
+npm run build:copy         # Copy static files to dist/
+npm run build:transforms   # Bundle all transformers to dist/js/bundles/
+npm run build:emoji        # Generate emoji data to dist/js/data/
+npm run build:templates    # Inject tool HTML templates to dist/index.html
 npm run build:index        # Generate transformer index
 
 # Run tests

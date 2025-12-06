@@ -18,23 +18,16 @@ const vm = require('vm');
 // Get project root directory (parent of tests directory)
 const projectRoot = path.resolve(__dirname, '..');
 
-// Load transforms
 const transforms = require(path.join(projectRoot, 'src/transformers/loader-node.js'));
-
-// Load decoder
 const decoderCode = fs.readFileSync(path.join(projectRoot, 'js/core/decoder.js'), 'utf8');
-
-// Load emoji dependencies
-const emojiLibraryCode = fs.readFileSync(path.join(projectRoot, 'js/core/emojiLibrary.js'), 'utf8');
 const emojiWordMapCode = fs.readFileSync(path.join(projectRoot, 'src/emojiWordMap.js'), 'utf8');
+const emojiUtilsCode = fs.readFileSync(path.join(projectRoot, 'js/utils/emoji.js'), 'utf8');
 
-// Create mock window/steganography objects
 const mockSteganography = {
     decodeEmoji: (text) => null,
     decodeInvisible: (text) => null
 };
 
-// Create sandbox for decoder
 const sandbox = {
     window: {
         transforms: transforms,
@@ -51,12 +44,8 @@ const sandbox = {
 };
 
 vm.createContext(sandbox);
-
-// Load emoji library and keywords
-vm.runInContext(emojiLibraryCode, sandbox);
+vm.runInContext(emojiUtilsCode, sandbox);
 vm.runInContext(emojiWordMapCode, sandbox);
-
-// Load decoder
 vm.runInContext(decoderCode, sandbox);
 
 const universalDecode = sandbox.universalDecode;

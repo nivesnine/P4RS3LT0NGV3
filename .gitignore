@@ -10,7 +10,7 @@ dist/
 .cache/
 *.log
 
-# Generated files
+# Generated files (now in dist/, but keeping for backwards compatibility)
 index.html
 src/transformers/index.js
 js/bundles/transforms-bundle.js

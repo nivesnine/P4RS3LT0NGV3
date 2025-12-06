@@ -120,7 +120,7 @@ window.encoders = transforms; // Alias for compatibility
 `;
 
 // Write the bundled file
-const outputPath = path.join(__dirname, '..', 'js', 'bundles', 'transforms-bundle.js');
+const outputPath = path.join(__dirname, '..', 'dist', 'js', 'bundles', 'transforms-bundle.js');
 const outputDir = path.dirname(outputPath);
 
 // Ensure the directory exists

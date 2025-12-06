@@ -58,7 +58,7 @@ function loadEmojiData() {
 
 // Create a mock window object with necessary properties
 const mockWindow = {
-    emojiLibrary: {
+    EmojiUtils: {
         splitEmojis: function(text) {
             // Simple emoji splitting - if Intl.Segmenter is available, use it
             if (typeof Intl !== 'undefined' && Intl.Segmenter) {
@@ -67,6 +67,12 @@ const mockWindow = {
             }
             // Fallback to Array.from for basic splitting
             return Array.from(text);
+        },
+        joinEmojis: function(emojis) {
+            return emojis.join('');
+        },
+        getAllEmojis: function() {
+            return Object.keys(mockWindow.emojiData || {});
         }
     },
     emojiData: loadEmojiData()

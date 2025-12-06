@@ -376,7 +376,7 @@ function mergeKeywords(baseKeywords, wordMapKeywords) {
  * Generate the emojiData.js file
  */
 function generateEmojiDataFile(emojiData) {
-    const outputPath = path.join(__dirname, '..', 'js', 'data', 'emojiData.js');
+    const outputPath = path.join(__dirname, '..', 'dist', 'js', 'data', 'emojiData.js');
     
     // Ensure data directory exists
     const dataDir = path.dirname(outputPath);

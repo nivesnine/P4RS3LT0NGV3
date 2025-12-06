@@ -40,7 +40,7 @@ templateFiles.forEach(templateFile => {
 
 // Read index.template.html (base template)
 const templatePath = path.join(__dirname, '../index.template.html');
-const indexPath = path.join(__dirname, '../index.html');
+const indexPath = path.join(__dirname, '../dist', 'index.html');
 
 if (!fs.existsSync(templatePath)) {
     console.error('\n❌ index.template.html not found!');
@@ -75,6 +75,12 @@ const newContent = before + replacement + after;
 const oldSize = indexContent.length;
 const newSize = newContent.length;
 const sizeDiff = newSize - oldSize;
+
+// Ensure dist directory exists
+const distDir = path.dirname(indexPath);
+if (!fs.existsSync(distDir)) {
+    fs.mkdirSync(distDir, { recursive: true });
+}
 
 // Write back
 fs.writeFileSync(indexPath, newContent, 'utf8');
