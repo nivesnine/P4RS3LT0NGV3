@@ -1725,6 +1725,264 @@ h1, h2, h3, h4, h5 {
     padding: 15px;
 }
 
+/* Glitch Token Panel */
+.glitch-token-panel {
+    position: fixed;
+    right: -100%;
+    top: 0;
+    width: 420px;
+    height: 100vh;
+    background-color: var(--secondary-bg);
+    border-left: 1px solid var(--input-border);
+    z-index: 100;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+    transition: right 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+
+.glitch-token-panel.active {
+    right: 0;
+}
+
+.glitch-token-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid var(--input-border);
+    background-color: var(--button-bg);
+}
+
+.glitch-token-header h3 {
+    font-size: 1.2rem;
+    margin: 0;
+    color: var(--accent-color);
+}
+
+.glitch-token-header .header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.glitch-token-header .close-button {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 5px;
+    transition: color 0.2s;
+}
+
+.glitch-token-header .close-button:hover {
+    color: var(--accent-color);
+}
+
+.glitch-token-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.glitch-token-filters {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--input-border);
+}
+
+.filter-group {
+    margin-bottom: 12px;
+}
+
+.filter-group:last-child {
+    margin-bottom: 0;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.filter-group select,
+.filter-group input {
+    width: 100%;
+    padding: 8px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.glitch-token-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.no-tokens {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+.token-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.token-card {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+.token-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.token-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.token-text {
+    font-family: 'Fira Code', monospace;
+    font-size: 1rem;
+    color: var(--text-color);
+    word-break: break-all;
+    flex: 1;
+    margin-right: 10px;
+}
+
+.copy-token-button {
+    background: var(--button-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.copy-token-button:hover {
+    background-color: var(--accent-color);
+    color: var(--button-bg);
+    border-color: var(--accent-color);
+}
+
+.token-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.token-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    width: fit-content;
+}
+
+.badge-unspeakable {
+    background-color: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+}
+
+.badge-polysemantic {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid #ffc107;
+}
+
+.badge-glitched_spelling {
+    background-color: rgba(156, 39, 176, 0.2);
+    color: #9c27b0;
+    border: 1px solid #9c27b0;
+}
+
+.badge-context_corruptor {
+    background-color: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    border: 1px solid #f44336;
+}
+
+.badge-loop_inducer {
+    background-color: rgba(255, 0, 0, 0.3);
+    color: #ff0000;
+    border: 1px solid #ff0000;
+    font-weight: 700;
+}
+
+.badge-identity_disruptor {
+    background-color: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+    border: 1px solid #ff9800;
+}
+
+.badge-fragment {
+    background-color: rgba(158, 158, 158, 0.2);
+    color: #9e9e9e;
+    border: 1px solid #9e9e9e;
+}
+
+.badge-unreachable {
+    background-color: rgba(96, 125, 139, 0.2);
+    color: #607d8b;
+    border: 1px solid #607d8b;
+}
+
+.token-id,
+.token-origin,
+.token-output,
+.token-note {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.token-id {
+    font-family: 'Fira Code', monospace;
+}
+
+.token-output {
+    font-style: italic;
+}
+
+.token-note {
+    margin-top: 4px;
+    padding-top: 6px;
+    border-top: 1px solid var(--input-border);
+    font-size: 0.8rem;
+}
+
 .no-history {
     padding: 20px;
     text-align: center;
@@ -2824,6 +3082,91 @@ html {
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
+}
+
+/* JSON/XML Fields Section */
+.json-fields-section,
+.xml-attributes-section {
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--main-bg-color);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+}
+
+.json-fields-section .section-header,
+.xml-attributes-section .section-header {
+    margin-bottom: 16px;
+}
+
+.json-fields-section .section-header h4,
+.xml-attributes-section .section-header h4 {
+    margin-bottom: 4px;
+    margin-top: 0;
+    color: var(--accent-color);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.json-fields-section .section-header p,
+.xml-attributes-section .section-header p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+.field-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.field-row input {
+    flex: 1;
+    padding: 8px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.field-row input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.remove-field-button,
+.add-field-button {
+    background-color: var(--button-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.remove-field-button:hover {
+    background-color: #ff6b6b;
+    border-color: #ff6b6b;
+    color: white;
+}
+
+.add-field-button:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--button-bg);
+}
+
+.add-field-button {
+    margin-top: 8px;
+}
     margin-top: 12px;
 }
 
@@ -3646,5 +3989,27 @@ html {
     .randomizer-info ul {
         margin-left: var(--spacing-md);
     }
+}
+
+/* ASCII Art Output */
+.ascii-art-output {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.2;
+    white-space: pre;
+    overflow-x: auto;
+    background: var(--secondary-bg);
+    padding: 16px;
+    border-radius: 6px;
+    border: 1px solid var(--input-border);
+}
+
+.ascii-art-output pre {
+    margin: 0;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+    white-space: pre;
+    overflow-x: auto;
 }
 

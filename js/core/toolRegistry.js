@@ -175,6 +175,9 @@ window.ToolRegistry = ToolRegistry;
 window.toolRegistry = new ToolRegistry();
 
 // Auto-register tools if they're available
+if (typeof AsciiArtTool !== 'undefined') {
+    window.toolRegistry.register(new AsciiArtTool());
+}
 if (typeof DecodeTool !== 'undefined') {
     window.toolRegistry.register(new DecodeTool());
 }

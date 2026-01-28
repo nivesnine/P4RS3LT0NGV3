@@ -14,13 +14,22 @@ class TransformTool extends Tool {
     
     getVueData() {
         const transforms = (window.transforms && Object.keys(window.transforms).length > 0)
-            ? Object.entries(window.transforms).map(([key, transform]) => ({
-                name: transform.name,
-                func: transform.func.bind(transform),
-                preview: transform.preview.bind(transform),
-                reverse: transform.reverse ? transform.reverse.bind(transform) : null,
-                category: transform.category || 'special'
-            }))
+            ? Object.entries(window.transforms)
+                .filter(([key, transform]) => {
+                    // Filter out transforms that don't have required properties
+                    if (!transform || !transform.name || !transform.func) {
+                        console.warn(`Transform "${key}" is missing required properties (name or func)`, transform);
+                        return false;
+                    }
+                    return true;
+                })
+                .map(([key, transform]) => ({
+                    name: transform.name,
+                    func: transform.func.bind(transform),
+                    preview: transform.preview ? transform.preview.bind(transform) : function() { return '[preview]'; },
+                    reverse: transform.reverse ? transform.reverse.bind(transform) : null,
+                    category: transform.category || 'special'
+                }))
             : [];
         
         const categorySet = new Set();
@@ -48,7 +57,7 @@ class TransformTool extends Tool {
         const favorites = this.loadFavorites();
         
         return {
-            transformInput: '',
+            transformInput: 'Hello World',
             transformOutput: '',
             activeTransform: null,
             transforms: transforms,

@@ -1,0 +1,90 @@
+<div v-if="activeTab === 'asciiart' && typeof asciiArtStyles !== 'undefined'" class="tab-content">
+    <div class="transform-layout">
+        <div class="transform-section">
+            <div class="section-header-card">
+                <div class="section-header-card-title">
+                    <i class="fas fa-font"></i>
+                    <h3>ASCII Art Generator</h3>
+                </div>
+                <p class="section-header-card-description">Convert text into ASCII art using different art styles. Supports letters, numbers, and spaces.</p>
+            </div>
+            
+            <!-- Input Section -->
+            <div class="input-section">
+                <textarea 
+                    id="ascii-input" 
+                    v-model="asciiInput" 
+                    placeholder="Enter text to convert to ASCII art..."
+                    rows="4"
+                ></textarea>
+            </div>
+
+            <!-- Style Selection -->
+            <div class="options-grid" v-if="asciiArtStyles && Array.isArray(asciiArtStyles) && asciiArtStyles.length > 0">
+                <label>
+                    Art Style
+                    <select v-model="asciiSelectedStyle" @change="onStyleChange">
+                        <option v-for="style in asciiArtStyles" :key="style.key" :value="style.key">
+                            {{ style.name }}
+                        </option>
+                    </select>
+                    <small v-if="getCurrentStyle && getCurrentStyle() && getCurrentStyle().description">
+                        {{ getCurrentStyle().description }}
+                    </small>
+                </label>
+            </div>
+
+            <!-- Dynamic Custom Options -->
+            <div class="options-grid" v-if="getCurrentStyle && getCurrentStyle() && getCurrentStyle().customOptions && Array.isArray(getCurrentStyle().customOptions) && getCurrentStyle().customOptions.length > 0">
+                <label v-for="option in getCurrentStyle().customOptions" :key="option.name">
+                    {{ option.label }}
+                    <input 
+                        v-if="option.type === 'number'"
+                        type="number" 
+                        v-model.number="asciiStyleOptions[option.name]"
+                        :min="option.min"
+                        :max="option.max"
+                        :placeholder="option.default"
+                    />
+                    <input 
+                        v-else-if="option.type === 'text'"
+                        type="text" 
+                        v-model="asciiStyleOptions[option.name]"
+                        :placeholder="option.default"
+                    />
+                    <select 
+                        v-else-if="option.type === 'select'"
+                        v-model="asciiStyleOptions[option.name]"
+                    >
+                        <option v-for="opt in option.options" :key="opt.value" :value="opt.value">
+                            {{ opt.label }}
+                        </option>
+                    </select>
+                    <small v-if="option.description">{{ option.description }}</small>
+                </label>
+            </div>
+
+            <!-- Copy Button -->
+            <div class="token-bomb-actions" v-if="asciiOutput">
+                <button 
+                    class="action-button copy" 
+                    @click="copyAsciiArt"
+                >
+                    <i class="fas fa-copy"></i> Copy ASCII Art
+                </button>
+            </div>
+
+            <!-- Output Section -->
+            <div class="output-section" v-if="asciiOutput">
+                <div class="output-heading">
+                    <h4>
+                        <i class="fas fa-font"></i> ASCII Art Output
+                    </h4>
+                </div>
+                <div class="output-content ascii-art-output">
+                    <pre>{{ asciiOutput }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

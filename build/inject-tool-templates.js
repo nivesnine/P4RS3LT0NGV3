@@ -18,7 +18,8 @@ const templateFiles = [
     'fuzzer.html',
     'tokenizer.html',
     'splitter.html',
-    'gibberish.html'
+    'gibberish.html',
+    'asciiart.html'
 ];
 
 const templatesDir = path.join(__dirname, '../templates');
